@@ -11,3 +11,5 @@
 Vertex::Vertex(QVector3D position) { _position = position; }
 
 [[maybe_unused]] QVector3D Vertex::getPosition() const { return _position; }
+
+void Vertex::setPosition(QVector3D newPosition) { _position = newPosition; }

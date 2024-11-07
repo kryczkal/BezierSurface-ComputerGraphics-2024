@@ -50,3 +50,15 @@ void QGraphicsEngine::testPixmap() {
 
   update();
 }
+
+int QGraphicsEngine::getWidth() const {
+    return _width;
+}
+
+int QGraphicsEngine::getHeight() const {
+    return _height;
+}
+
+QImage QGraphicsEngine::getQImage() const {
+    return _qImage;
+}

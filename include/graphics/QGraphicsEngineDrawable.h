@@ -1,0 +1,17 @@
+//
+// Created by wookie on 11/7/24.
+//
+
+#ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINEDRAWABLE_H
+#define BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINEDRAWABLE_H
+
+
+#include <QImage>
+
+class QGraphicsEngineDrawable {
+public:
+    virtual void draw(const QImage& canvas, const QImage& texture) = 0;
+};
+
+
+#endif //BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINEDRAWABLE_H

@@ -7,13 +7,22 @@
 
 #include <QVector3D>
 #include <QVector>
+#include "Mesh.h"
 
-class BezierSurface {
+class BezierSurface : public Mesh {
 public:
-  explicit BezierSurface(const QString &filename);
+    explicit BezierSurface(const QString &filename, const int tessellationLevel = 10);
+
+    [[maybe_unused]] [[nodiscard]] QVector<QVector3D> getControlPoints() const;
+
 
 private:
-  QVector<QVector3D> _controlPoints;
+    QVector<QVector3D> _controlPoints;
+
+    void readControlPoints(const QString &filename);
+    void map3dBezierFrom2dMesh();
+
+    QVector3D evaluateBezierSurface(float u, float v) const;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_BEZIERSURFACE_H
