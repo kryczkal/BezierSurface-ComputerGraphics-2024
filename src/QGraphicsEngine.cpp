@@ -6,10 +6,10 @@
 #include <QMutex>
 #include <QPainter>
 #include <QPixmap>
+#include <QRandomGenerator>
 #include <QStyleOptionGraphicsItem>
 #include <QTimer>
 #include <QWidget>
-#include <QtConcurrent/QtConcurrentRun>
 
 QGraphicsEngine::QGraphicsEngine(int width, int height)
     : _width(width), _height(height) {
@@ -34,12 +34,16 @@ void QGraphicsEngine::testPixmap() {
                             Qt::yellow, Qt::cyan,  Qt::magenta,
                             Qt::gray,   Qt::black, Qt::white};
 
-  QColor currentColor = colors[qrand() % colors.size()];
+  QRandomGenerator *randomGen = QRandomGenerator::global();
+
+  QColor currentColor = colors[randomGen->bounded(colors.size())];
+
   for (int x = 0; x < _width; x++) {
     for (int y = 0; y < _height; y++) {
-      if (qrand() % 100 < 5) {
-        currentColor = colors[qrand() % colors.size()];
+      if (randomGen->bounded(100) < 5) {
+        currentColor = colors[randomGen->bounded(colors.size())];
       }
+
       _qImage.setPixelColor(x, y, currentColor);
     }
   }

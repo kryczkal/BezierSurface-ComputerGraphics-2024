@@ -22,7 +22,7 @@ BezierSurface::BezierSurface(const QString &filename) {
   QTextStream in(&file);
   while (!in.atEnd()) {
     QString line = in.readLine();
-    QStringList coords = line.split(" ", QString::SkipEmptyParts);
+    QStringList coords = line.split(" ");
 
     if (coords.size() != 3) {
       qDebug() << "Invalid line:" << line;
