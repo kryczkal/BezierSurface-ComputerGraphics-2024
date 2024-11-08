@@ -22,7 +22,7 @@ class BezierSurface : public Mesh
     void readControlPoints(const QString &filename);
     void map3dBezierFrom2dMesh();
 
-    QVector3D evaluateBezierSurface(float u, float v) const;
+    void evaluateBezierSurface(Vertex &vertex) const;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_BEZIERSURFACE_H

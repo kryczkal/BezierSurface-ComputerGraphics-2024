@@ -4,10 +4,14 @@
 
 #include "geometry/Vertex.h"
 
-[[maybe_unused]] Vertex::Vertex(qreal x, qreal y, qreal z) { _position = QVector3D(x, y, z); }
+Vertex::Vertex(QVector3D position, QVector3D normal, QVector3D uTangent, QVector3D vTangent) {
+    _positionOriginal = position;
+    _normalOriginal = normal;
+    _uTangentOriginal = uTangent;
+    _vTangentOriginal = vTangent;
 
-Vertex::Vertex(QVector3D position) { _position = position; }
-
-[[maybe_unused]] QVector3D Vertex::getPosition() const { return _position; }
-
-void Vertex::setPosition(QVector3D newPosition) { _position = newPosition; }
+    _positionTransformed = position;
+    _normalTransformed = normal;
+    _uTangentTransformed = uTangent;
+    _vTangentTransformed = vTangent;
+}

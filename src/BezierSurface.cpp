@@ -82,19 +82,14 @@ void BezierSurface::map3dBezierFrom2dMesh()
         for (int i = 0; i < 3; i++)
         {
             Vertex &vertex     = triangle[i];
-            QVector3D position = evaluateBezierSurface(vertex.getPosition().x(), vertex.getPosition().y());
+            evaluateBezierSurface(vertex);
 
-            vertex.setPosition(position);
-            center += position;
-
-            minX = std::min(minX, position.x());
-            minY = std::min(minY, position.y());
-            maxX = std::max(maxX, position.x());
-            maxY = std::max(maxY, position.y());
+            minX = std::min(minX, vertex.getPositionOriginal().x());
+            minY = std::min(minY, vertex.getPositionOriginal().y());
+            maxX = std::max(maxX, vertex.getPositionOriginal().x());
+            maxY = std::max(maxY, vertex.getPositionOriginal().y());
         }
     }
-    center /= static_cast<float>(_triangles.size() * 3);
-    qDebug() << "Center:" << center;
     qDebug() << "Bounding box:" << minX << minY << maxX << maxY;
 
     static constexpr float lowerBound = 0.20;
@@ -102,37 +97,68 @@ void BezierSurface::map3dBezierFrom2dMesh()
     static constexpr float scale      = upperBound - lowerBound;
     static constexpr float offset     = (1 - scale) / 2;
 
-    qDebug() << "Centering and scaling mesh to:" << lowerBound << "-" << upperBound;
     float scaleX = scale / (maxX - minX);
     float scaleY = scale / (maxY - minY);
+
+    qDebug() << "Centering and scaling mesh to:" << lowerBound << "-" << upperBound;
+
     for (auto &triangle : _triangles)
     {
         for (int i = 0; i < 3; i++)
         {
             Vertex &vertex = triangle[i];
-            vertex.setPosition(
-                (vertex.getPosition() - QVector3D(minX, minY, 0)) * QVector3D(scaleX, scaleY, 1) +
-                QVector3D(offset, offset, 0)
-            );
+
+            QVector3D originalPosition = vertex.getPositionOriginal();
+            QVector3D scaledPosition = (originalPosition - QVector3D(minX, minY, 0)) * QVector3D(scaleX, scaleY, 1) +
+                                       QVector3D(offset, offset, 0);
+            vertex.setPositionOriginal(scaledPosition);
+
+            QVector3D uTangent = vertex.getUTangentOriginal() * QVector3D(scaleX, scaleX, scaleX).normalized();
+            QVector3D vTangent = vertex.getVTangentOriginal() * QVector3D(scaleY, scaleY, scaleY).normalized();
+
+            QVector3D normal = QVector3D::crossProduct(uTangent, vTangent).normalized();
+
+            vertex.setUTangentOriginal(uTangent);
+            vertex.setVTangentOriginal(vTangent);
+            vertex.setNormalOriginal(normal);
         }
     }
 }
 
-QVector3D BezierSurface::evaluateBezierSurface(float u, float v) const
+void BezierSurface::evaluateBezierSurface(Vertex &vertex) const
 {
-    QVector3D result(0, 0, 0);
+    float u = vertex.getPositionOriginal().x();
+    float v = vertex.getPositionOriginal().y();
+    vertex.setU(u);
+    vertex.setV(v);
+
+    QVector3D position(0, 0, 0);
+    QVector3D uTangent(0, 0, 0);
+    QVector3D vTangent(0, 0, 0);
 
     // Coefficients for Bernstein polynomials of degree 3
     float Bu[4] = {(1 - u) * (1 - u) * (1 - u), 3 * u * (1 - u) * (1 - u), 3 * u * u * (1 - u), u * u * u};
     float Bv[4] = {(1 - v) * (1 - v) * (1 - v), 3 * v * (1 - v) * (1 - v), 3 * v * v * (1 - v), v * v * v};
 
+    // Derivatives of Bernstein polynomials with respect to u and v
+    float dBu[4] = {-3 * (1 - u) * (1 - u), 3 * (1 - u) * (1 - 3 * u), 3 * u * (2 - 3 * u), 3 * u * u};
+    float dBv[4] = {-3 * (1 - v) * (1 - v), 3 * (1 - v) * (1 - 3 * v), 3 * v * (2 - 3 * v), 3 * v * v};
+
     for (int i = 0; i < 4; ++i)
     {
         for (int j = 0; j < 4; ++j)
         {
-            result += Bu[i] * Bv[j] * _controlPoints[i * 4 + j];
+            QVector3D controlPoint = _controlPoints[i * 4 + j];
+            position += Bu[i] * Bv[j] * controlPoint;
+            uTangent += dBu[i] * Bv[j] * controlPoint;
+            vTangent += Bu[i] * dBv[j] * controlPoint;
         }
     }
 
-    return result;
+    QVector3D normal = QVector3D::crossProduct(uTangent, vTangent).normalized();
+
+    vertex.setPositionOriginal(position);
+    vertex.setUTangentOriginal(uTangent);
+    vertex.setVTangentOriginal(vTangent);
+    vertex.setNormalOriginal(normal);
 }

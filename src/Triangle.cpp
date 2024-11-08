@@ -39,9 +39,9 @@ void Triangle::draw(DrawData &drawData)
 {
     Settings &settings = Settings::getInstance();
 
-    QVector3D posA = _a.getPosition();
-    QVector3D posB = _b.getPosition();
-    QVector3D posC = _c.getPosition();
+    QVector3D posA = _a.getPositionTransformed();
+    QVector3D posB = _b.getPositionTransformed();
+    QVector3D posC = _c.getPositionTransformed();
 
     int width  = drawData.canvas.width();
     int height = drawData.canvas.height();
