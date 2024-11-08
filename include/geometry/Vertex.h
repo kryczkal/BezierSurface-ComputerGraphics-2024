@@ -5,9 +5,11 @@
 #ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_VERTEX_H
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_VERTEX_H
 
+#include "graphics/QGraphicsEngineDrawable.h"
+#include <QMatrix3x3>
 #include <QVector3D>
 
-class Vertex
+class Vertex : public QGraphicsEngineDrawable
 {
     public:
     // Constructors
@@ -61,6 +63,11 @@ class Vertex
 
     [[maybe_unused]] void setU(float u) { _u = u; }
     [[maybe_unused]] void setV(float v) { _v = v; }
+
+    // Public Methods
+    void draw(DrawData &drawData) override;
+    void transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix) override;
+    void transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix) override;
 
     private:
     QVector3D _positionOriginal;

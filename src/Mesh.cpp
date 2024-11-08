@@ -5,6 +5,7 @@
 #include "geometry/Mesh.h"
 #include "geometry/Triangle.h"
 #include "models/DrawData.h"
+#include <QMatrix4x4>
 #include <cmath>
 
 [[maybe_unused]] Mesh::Mesh(const QVector<Triangle> &triangles) { _triangles = triangles; }
@@ -46,5 +47,25 @@ void Mesh::draw(DrawData &drawData)
     for (auto &triangle : _triangles)
     {
         triangle.draw(drawData);
+    }
+}
+
+void Mesh::transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix)
+{
+    matrix           = preprocessMatrix ? matrix : matrix.inverted().transposed();
+    preprocessMatrix = false;
+    for (auto &triangle : _triangles)
+    {
+        triangle.transform(matrix, absolute, preprocessMatrix);
+    }
+}
+
+void Mesh::transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix)
+{
+    matrix           = preprocessMatrix ? matrix : matrix.inverted().transposed();
+    preprocessMatrix = false;
+    for (auto &triangle : _triangles)
+    {
+        triangle.transform(matrix, center, absolute, preprocessMatrix);
     }
 }

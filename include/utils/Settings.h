@@ -5,8 +5,10 @@
 #ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_SETTINGS_H
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_SETTINGS_H
 
+#include "GraphicsEngineSettings.h"
 #include "MeshSettings.h"
 #include "TriangleSettings.h"
+#include "VertexSettings.h"
 #include <QColor>
 
 class Settings
@@ -18,9 +20,10 @@ class Settings
         return instance;
     }
 
-    QColor backgroundColor = Qt::white;
     TriangleSettings triangleSettings;
     MeshSettings meshSettings;
+    GraphicsEngineSettings graphicsEngineSettings;
+    VertexSettings vertexSettings;
 
     private:
     Settings()                       = default;

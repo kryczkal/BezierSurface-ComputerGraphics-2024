@@ -7,6 +7,7 @@
 #include "models/DrawData.h"
 #include "utils/Settings.h"
 #include <QDebug>
+#include <QMatrix4x4>
 #include <cmath>
 
 [[maybe_unused]] Triangle::Triangle(Vertex a, Vertex b, Vertex c) : _a(a), _b(b), _c(c) {}
@@ -65,6 +66,12 @@ void Triangle::draw(DrawData &drawData)
     int minY = std::floor(std::min({y0, y1, y2}));
     int maxY = std::ceil(std::max({y0, y1, y2}));
 
+    // Clamp the bounding box to the canvas size
+    minX = std::max(0, minX);
+    maxX = std::min(width - 1, maxX);
+    minY = std::max(0, minY);
+    maxY = std::min(height - 1, maxY);
+
     qreal denom = (y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2);
     if (denom == 0)
     {
@@ -72,32 +79,18 @@ void Triangle::draw(DrawData &drawData)
         return;
     }
 
-    if (settings.triangleSettings.debugDraw && drawData.textureOrColor.canConvert<QColor>())
+    if (settings.triangleSettings.debugDraw && drawData.textureOrBrushColor.canConvert<QColor>())
     {
-        auto vertices = QVector<QVector3D>{posA, posB, posC};
-        for (auto vertice : vertices)
-        {
-            int x = vertice.x() * width;
-            int y = vertice.y() * height;
-            for (int xm = x - 5; xm <= x + 5; ++xm)
-            {
-                for (int ym = y - 5; ym <= y + 5; ++ym)
-                {
-                    if (xm >= 0 && xm < width && ym >= 0 && ym < height)
-                    {
-                        drawData.zBuffer[xm][ym] = std::numeric_limits<qreal>::min();
-                        drawData.canvas.setPixelColor(xm, ym, settings.triangleSettings.triangleVertexColor);
-                    }
-                }
-            }
-        }
+        _a.draw(drawData);
+        _b.draw(drawData);
+        _c.draw(drawData);
     }
 
     static constexpr auto drawPixel = [](DrawData &drawData, int y, int x)
     {
-        if (drawData.textureOrColor.canConvert<QColor>())
+        if (drawData.textureOrBrushColor.canConvert<QColor>())
         {
-            QColor color = drawData.textureOrColor.value<QColor>();
+            QColor color = drawData.textureOrBrushColor.value<QColor>();
             drawData.canvas.setPixelColor(x, y, color);
         }
         else
@@ -108,11 +101,19 @@ void Triangle::draw(DrawData &drawData)
         }
     };
 
-    static constexpr auto drawPixelDebug =
-        [](DrawData &drawData, const Settings &settings, int y, int x, qreal w0, qreal w1, qreal w2)
+    qreal A0 = y1 - y0, B0 = x0 - x1, C0 = x1 * y0 - x0 * y1;
+    qreal A1 = y2 - y1, B1 = x1 - x2, C1 = x2 * y1 - x1 * y2;
+    qreal A2 = y0 - y2, B2 = x2 - x0, C2 = x0 * y2 - x2 * y0;
+
+    auto drawPixelDebug = [&](DrawData &drawData, const Settings &settings, int y, int x, qreal w0, qreal w1, qreal w2)
     {
-        float proximityCoef = settings.triangleSettings.triangleEdgeDrawProximityCoef;
-        if (w0 < proximityCoef || w1 < proximityCoef || w2 < proximityCoef)
+        qreal dist0 = std::abs(A0 * x + B0 * y + C0) / std::sqrt(A0 * A0 + B0 * B0);
+        qreal dist1 = std::abs(A1 * x + B1 * y + C1) / std::sqrt(A1 * A1 + B1 * B1);
+        qreal dist2 = std::abs(A2 * x + B2 * y + C2) / std::sqrt(A2 * A2 + B2 * B2);
+
+        qreal minDist = std::min({dist0, dist1, dist2});
+
+        if (minDist <= 0.5)
             drawData.canvas.setPixelColor(x, y, settings.triangleSettings.triangleEdgeColor);
         else
             drawData.canvas.setPixelColor(x, y, settings.triangleSettings.triangleFillColor);
@@ -132,7 +133,7 @@ void Triangle::draw(DrawData &drawData)
 
             // z Test
             qreal z = w0 * z0 + w1 * z1 + w2 * z2;
-            if (z >= drawData.zBuffer[x][y])
+            if (z < drawData.zBuffer[x][y])
                 continue;
 
             drawData.zBuffer[x][y] = z;
@@ -145,4 +146,22 @@ void Triangle::draw(DrawData &drawData)
             drawPixel(drawData, y, x);
         }
     }
+}
+
+void Triangle::transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix)
+{
+    matrix           = preprocessMatrix ? matrix.inverted().transposed() : matrix;
+    preprocessMatrix = false;
+    _a.transform(matrix, absolute, preprocessMatrix);
+    _b.transform(matrix, absolute, preprocessMatrix);
+    _c.transform(matrix, absolute, preprocessMatrix);
+}
+
+void Triangle::transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix)
+{
+    matrix           = preprocessMatrix ? matrix.inverted().transposed() : matrix;
+    preprocessMatrix = false;
+    _a.transform(matrix, center, absolute, preprocessMatrix);
+    _b.transform(matrix, center, absolute, preprocessMatrix);
+    _c.transform(matrix, center, absolute, preprocessMatrix);
 }

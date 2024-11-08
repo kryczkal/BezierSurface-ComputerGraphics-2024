@@ -24,10 +24,15 @@ class Triangle : public QGraphicsEngineDrawable
 
     [[maybe_unused]] [[nodiscard]] Vertex getC() const;
 
-    Vertex &operator[](int i);
-
-    // Drawing
+    // Public Methods
     void draw(DrawData &drawData) override;
+    void transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix) override;
+    void transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix) override;
+
+    // Operators
+    Vertex &operator[](int i);
+    auto begin() { return std::array<Vertex *, 3>{&_a, &_b, &_c}.begin(); }
+    auto end() { return std::array<Vertex *, 3>{&_a, &_b, &_c}.end(); }
 
     private:
     Vertex _a;

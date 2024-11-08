@@ -5,6 +5,7 @@
 #include "models/DrawData.h"
 #include "utils/Settings.h"
 #include <QColor>
+#include <QMatrix4x4>
 #include <QMutex>
 #include <QPainter>
 #include <QPixmap>
@@ -16,7 +17,7 @@
 QGraphicsEngine::QGraphicsEngine(int width, int height) : _width(width), _height(height)
 {
     _qImage = QImage(_width, _height, QImage::Format_ARGB32);
-    _qImage.fill(Settings::getInstance().backgroundColor);
+    _qImage.fill(Settings::getInstance().graphicsEngineSettings.backgroundColor);
 }
 
 QRectF QGraphicsEngine::boundingRect() const { return {0, 0, static_cast<qreal>(_width), static_cast<qreal>(_height)}; }
@@ -69,7 +70,8 @@ void QGraphicsEngine::clearDrawables() { _drawables.clear(); }
 
 void QGraphicsEngine::draw()
 {
-    QMutexLocker locker(&_drawMutex);
+    //    QMutexLocker locker(&_drawMutex);
+    _qImage.fill(Settings::getInstance().graphicsEngineSettings.backgroundColor);
     DrawData drawData(_qImage, Qt::darkRed);
 
     for (auto &drawable : _drawables)
@@ -78,4 +80,40 @@ void QGraphicsEngine::draw()
     }
 
     update();
+}
+
+void QGraphicsEngine::setRotationZ(float rotationZ)
+{
+    _rotationZ = rotationZ;
+    rotate(_rotationX, _rotationY, _rotationZ);
+}
+
+void QGraphicsEngine::setRotationY(float rotationY)
+{
+    _rotationY = rotationY;
+    rotate(_rotationX, _rotationY, _rotationZ);
+}
+
+void QGraphicsEngine::setRotationX(float rotationX)
+{
+    _rotationX = rotationX;
+    rotate(_rotationX, _rotationY, _rotationZ);
+}
+
+void QGraphicsEngine::rotate(float x, float y, float z)
+{
+    QMatrix4x4 rotationMatrix;
+
+    rotationMatrix.rotate(x, 1, 0, 0);
+    rotationMatrix.rotate(y, 0, 1, 0);
+    rotationMatrix.rotate(z, 0, 0, 1);
+
+    QVector3D center(0.0f, 0.5f, 0.0f);
+
+    QMutexLocker locker(&_drawMutex);
+    for (auto &drawable : _drawables)
+    {
+        drawable->transform(rotationMatrix, center, true);
+    }
+    draw();
 }

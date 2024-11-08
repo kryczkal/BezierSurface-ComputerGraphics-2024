@@ -4,12 +4,12 @@
 
 #include "models/DrawData.h"
 
-DrawData::DrawData(QImage &canvas, const QColor &color) : canvas(canvas)
+DrawData::DrawData(QImage &canvas, const QColor &brushColor) : canvas(canvas)
 {
-    setColor(color);
+    setBrushColor(brushColor);
     X       = canvas.width();
     Y       = canvas.height();
-    zBuffer = QVector<QVector<float>>(X, QVector<float>(Y, std::numeric_limits<float>::max()));
+    zBuffer = QVector<QVector<float>>(X, QVector<float>(Y, std::numeric_limits<float>::min()));
 }
 
 void DrawData::clear(const QColor &color)
@@ -35,6 +35,6 @@ void DrawData::clearZBuffer()
     }
 }
 
-void DrawData::setColor(const QColor &color) { textureOrColor = QVariant::fromValue(color); }
+void DrawData::setBrushColor(const QColor &color) { textureOrBrushColor = QVariant::fromValue(color); }
 
-void DrawData::setTexture(const QImage &texture) { textureOrColor = QVariant::fromValue(texture); }
+void DrawData::setTexture(const QImage &texture) { textureOrBrushColor = QVariant::fromValue(texture); }

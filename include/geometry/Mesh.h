@@ -7,6 +7,8 @@
 
 #include "Triangle.h"
 #include "graphics/QGraphicsEngineDrawable.h"
+#include <QMatrix3x3>
+#include <QMatrix4x4>
 #include <QVector>
 
 class Mesh : public QGraphicsEngineDrawable
@@ -24,10 +26,13 @@ class Mesh : public QGraphicsEngineDrawable
     [[maybe_unused]] static Mesh create2dTessellation(int tessellationLevel);
     static QVector<Triangle> create2dTessellationTriangles(int tessellationLevel);
 
-    // Drawing
+    // Public Methods
     void draw(DrawData &drawData) override;
+    void transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix) override;
+    void transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix) override;
 
     protected:
+    QMatrix4x4 modelMatrix;
     QVector<Triangle> _triangles;
 };
 

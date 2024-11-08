@@ -11,10 +11,10 @@
 class DrawData
 {
     public:
-    DrawData(QImage &canvas, const QColor &color);
+    DrawData(QImage &canvas, const QColor &brushColor);
 
     QImage &canvas;
-    QVariant textureOrColor;
+    QVariant textureOrBrushColor;
     QVector<QVector<float>> zBuffer;
 
     void clearZBuffer();
@@ -25,7 +25,7 @@ class DrawData
 
     void setTexture(const QImage &texture);
 
-    void setColor(const QColor &color);
+    void setBrushColor(const QColor &color);
 
     private:
     int X = 800;
