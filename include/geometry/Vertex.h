@@ -16,7 +16,7 @@ public:
 
   [[maybe_unused]] [[nodiscard]] QVector3D getPosition() const;
 
-    void setPosition(QVector3D vector3D);
+  void setPosition(QVector3D vector3D);
 
 private:
   QVector3D _position;

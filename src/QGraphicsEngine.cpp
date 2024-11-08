@@ -53,34 +53,27 @@ void QGraphicsEngine::testPixmap() {
   update();
 }
 
-int QGraphicsEngine::getWidth() const {
-    return _width;
+int QGraphicsEngine::getWidth() const { return _width; }
+
+int QGraphicsEngine::getHeight() const { return _height; }
+
+QImage QGraphicsEngine::getQImage() const { return _qImage; }
+
+void QGraphicsEngine::addDrawable(
+    QSharedPointer<QGraphicsEngineDrawable> &drawable) {
+  QMutexLocker locker(&_drawMutex);
+  _drawables.append(drawable);
 }
 
-int QGraphicsEngine::getHeight() const {
-    return _height;
-}
-
-QImage QGraphicsEngine::getQImage() const {
-    return _qImage;
-}
-
-void QGraphicsEngine::addDrawable(QSharedPointer<QGraphicsEngineDrawable>& drawable) {
-    QMutexLocker locker(&_drawMutex);
-    _drawables.append(drawable);
-}
-
-void QGraphicsEngine::clearDrawables() {
-    _drawables.clear();
-}
+void QGraphicsEngine::clearDrawables() { _drawables.clear(); }
 
 void QGraphicsEngine::draw() {
-    QMutexLocker locker(&_drawMutex);
-    DrawData drawData(_qImage, Qt::darkRed);
+  QMutexLocker locker(&_drawMutex);
+  DrawData drawData(_qImage, Qt::darkRed);
 
-    for (auto &drawable : _drawables) {
-        drawable->draw(drawData);
-    }
+  for (auto &drawable : _drawables) {
+    drawable->draw(drawData);
+  }
 
-    update();
+  update();
 }

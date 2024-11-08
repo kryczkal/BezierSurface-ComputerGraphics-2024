@@ -7,6 +7,6 @@
 
 class MeshSettings {
 public:
-    int tessellationLevel = 100;
+  int tessellationLevel = 100;
 };
-#endif //BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESHSETTINGS_H
+#endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESHSETTINGS_H
