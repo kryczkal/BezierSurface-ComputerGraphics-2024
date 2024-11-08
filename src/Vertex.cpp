@@ -69,7 +69,8 @@ void Vertex::draw(DrawData &drawData)
 void Vertex::transform(QMatrix4x4 &matrix)
 {
     _positionTransformed = matrix * _positionOriginal;
-    _normalTransformed   = matrix * _normalOriginal;
-    _uTangentTransformed = matrix * _uTangentOriginal;
-    _vTangentTransformed = matrix * _vTangentOriginal;
+
+    _normalTransformed   = matrix.mapVector(_normalOriginal);
+    _uTangentTransformed = matrix.mapVector(_uTangentOriginal);
+    _vTangentTransformed = matrix.mapVector(_vTangentOriginal);
 }

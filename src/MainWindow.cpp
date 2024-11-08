@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     bezierSurfaceLayout->setSpacing(5);
 
     QCheckBox *bezierSurfaceCheckbox = new QCheckBox("Draw Triangles - Debug");
-    bezierSurfaceCheckbox->setChecked(true);
+    bezierSurfaceCheckbox->setChecked(settings.triangleSettings.debugDraw);
     bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox);
     connect(
         bezierSurfaceCheckbox, &QCheckBox::stateChanged,
@@ -119,6 +119,42 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         {
             Settings &settings                  = Settings::getInstance();
             settings.triangleSettings.debugDraw = state == Qt::Checked;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+    QCheckBox *bezierSurfaceCheckbox2 = new QCheckBox("Draw Normals");
+    bezierSurfaceCheckbox2->setChecked(settings.vertexSettings.drawNormals);
+    bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox2);
+    connect(
+        bezierSurfaceCheckbox2, &QCheckBox::stateChanged,
+        [centralWidget](int state)
+        {
+            Settings &settings                  = Settings::getInstance();
+            settings.vertexSettings.drawNormals = state == Qt::Checked;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+    QCheckBox *bezierSurfaceCheckbox3 = new QCheckBox("Draw Tangents");
+    bezierSurfaceCheckbox3->setChecked(settings.vertexSettings.drawTangents);
+    bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox3);
+    connect(
+        bezierSurfaceCheckbox3, &QCheckBox::stateChanged,
+        [centralWidget](int state)
+        {
+            Settings &settings                   = Settings::getInstance();
+            settings.vertexSettings.drawTangents = state == Qt::Checked;
 
             QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
             QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
