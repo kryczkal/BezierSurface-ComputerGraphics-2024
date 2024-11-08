@@ -5,8 +5,9 @@
 #ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESHSETTINGS_H
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESHSETTINGS_H
 
-class MeshSettings {
-public:
-  int tessellationLevel = 100;
+class MeshSettings
+{
+    public:
+    int tessellationLevel = 100;
 };
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESHSETTINGS_H

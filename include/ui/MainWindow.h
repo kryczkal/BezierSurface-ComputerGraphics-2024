@@ -3,13 +3,14 @@
 
 #include <QMainWindow>
 
-class MainWindow : public QMainWindow {
-  Q_OBJECT
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
 
-public:
-  explicit MainWindow(QWidget *parent = nullptr);
+    public:
+    explicit MainWindow(QWidget *parent = nullptr);
 
-  void resizeEvent(QResizeEvent *event) override;
-  ~MainWindow();
+    void resizeEvent(QResizeEvent *event) override;
+    ~MainWindow();
 };
 #endif // MAINWINDOW_H

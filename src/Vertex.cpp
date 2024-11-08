@@ -4,9 +4,7 @@
 
 #include "geometry/Vertex.h"
 
-[[maybe_unused]] Vertex::Vertex(qreal x, qreal y, qreal z) {
-  _position = QVector3D(x, y, z);
-}
+[[maybe_unused]] Vertex::Vertex(qreal x, qreal y, qreal z) { _position = QVector3D(x, y, z); }
 
 Vertex::Vertex(QVector3D position) { _position = position; }
 

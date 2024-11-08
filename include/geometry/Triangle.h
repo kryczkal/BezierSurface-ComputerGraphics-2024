@@ -11,27 +11,28 @@
 
 class DrawData;
 
-class Triangle : public QGraphicsEngineDrawable {
-public:
-  // Constructors
-  [[maybe_unused]] Triangle(Vertex a, Vertex b, Vertex c);
+class Triangle : public QGraphicsEngineDrawable
+{
+    public:
+    // Constructors
+    [[maybe_unused]] Triangle(Vertex a, Vertex b, Vertex c);
 
-  // Getters
-  [[maybe_unused]] [[nodiscard]] Vertex getA() const;
+    // Getters
+    [[maybe_unused]] [[nodiscard]] Vertex getA() const;
 
-  [[maybe_unused]] [[nodiscard]] Vertex getB() const;
+    [[maybe_unused]] [[nodiscard]] Vertex getB() const;
 
-  [[maybe_unused]] [[nodiscard]] Vertex getC() const;
+    [[maybe_unused]] [[nodiscard]] Vertex getC() const;
 
-  Vertex &operator[](int i);
+    Vertex &operator[](int i);
 
-  // Drawing
-  void draw(DrawData &drawData) override;
+    // Drawing
+    void draw(DrawData &drawData) override;
 
-private:
-  Vertex _a;
-  Vertex _b;
-  Vertex _c;
+    private:
+    Vertex _a;
+    Vertex _b;
+    Vertex _c;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_TRIANGLE_H

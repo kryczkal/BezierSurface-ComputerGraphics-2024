@@ -7,19 +7,24 @@
 
 #include <QVector3D>
 
-class Vertex {
-public:
-  Vertex(qreal x, qreal y, qreal z);
-  explicit Vertex(QVector3D position);
+class Vertex
+{
+    public:
+    Vertex(qreal x, qreal y, qreal z);
 
-  Vertex(const Vertex &) = default;
+    explicit Vertex(QVector3D position);
 
-  [[maybe_unused]] [[nodiscard]] QVector3D getPosition() const;
+    Vertex(const Vertex &) = default;
 
-  void setPosition(QVector3D vector3D);
+    [[maybe_unused]] [[nodiscard]] QVector3D getPosition() const;
 
-private:
-  QVector3D _position;
+    void setPosition(QVector3D vector3D);
+
+    private:
+    QVector3D _position;
+    QVector3D _normal;
+    QVector3D uTangent;
+    QVector3D vTangent;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_VERTEX_H

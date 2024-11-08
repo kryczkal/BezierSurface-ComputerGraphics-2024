@@ -9,21 +9,23 @@
 #include "TriangleSettings.h"
 #include <QColor>
 
-class Settings {
-public:
-  static Settings &getInstance() {
-    static Settings instance;
-    return instance;
-  }
+class Settings
+{
+    public:
+    static Settings &getInstance()
+    {
+        static Settings instance;
+        return instance;
+    }
 
-  QColor backgroundColor = Qt::white;
-  TriangleSettings triangleSettings;
-  MeshSettings meshSettings;
+    QColor backgroundColor = Qt::white;
+    TriangleSettings triangleSettings;
+    MeshSettings meshSettings;
 
-private:
-  Settings() = default;
-  Settings(Settings const &) = delete;
-  void operator=(Settings const &) = delete;
+    private:
+    Settings()                       = default;
+    Settings(Settings const &)       = delete;
+    void operator=(Settings const &) = delete;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_SETTINGS_H

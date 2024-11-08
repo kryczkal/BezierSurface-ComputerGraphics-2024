@@ -8,9 +8,10 @@
 #include <QImage>
 class DrawData;
 
-class QGraphicsEngineDrawable {
-public:
-  virtual void draw(DrawData &drawData) = 0;
+class QGraphicsEngineDrawable
+{
+    public:
+    virtual void draw(DrawData &drawData) = 0;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINEDRAWABLE_H
