@@ -14,8 +14,12 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Include controlPoints.txt in the build directory
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/controlPointsWavy.txt ${CMAKE_CURRENT_BINARY_DIR}/controlPointsWavy.txt COPYONLY)
+# Include basic.txt in the build directory
+file(GLOB TXT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/bezierSurfaces/*.txt")
+foreach(TXT_FILE ${TXT_FILES})
+    get_filename_component(TXT_FILE_NAME ${TXT_FILE} NAME)
+    configure_file(${TXT_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${TXT_FILE_NAME} COPYONLY)
+endforeach()
 
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" include/*.h)
 set(PROJECT_SOURCES

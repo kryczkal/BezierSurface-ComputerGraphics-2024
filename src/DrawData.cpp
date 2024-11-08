@@ -9,7 +9,7 @@ DrawData::DrawData(QImage &canvas, const QColor &brushColor) : canvas(canvas)
     setBrushColor(brushColor);
     X       = canvas.width();
     Y       = canvas.height();
-    zBuffer = QVector<QVector<float>>(X, QVector<float>(Y, std::numeric_limits<float>::min()));
+    zBuffer = QVector<QVector<float>>(X, QVector<float>(Y, -std::numeric_limits<float>::infinity()));
 }
 
 void DrawData::clear(const QColor &color)
@@ -30,7 +30,7 @@ void DrawData::clearZBuffer()
     {
         for (int j = 0; j < Y; j++)
         {
-            zBuffer[i][j] = std::numeric_limits<float>::min();
+            zBuffer[i][j] = -std::numeric_limits<float>::infinity();
         }
     }
 }

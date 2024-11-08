@@ -20,7 +20,7 @@ class VertexSettings
     QColor normalColor = QColor(0, 0, 255);
 
     // Tangents
-    bool drawTangents   = true;
+    bool drawTangents   = false;
     float tangentLength = 0.1f;
     QColor tangentColor = QColor(0, 125, 125);
 };

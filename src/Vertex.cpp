@@ -66,29 +66,10 @@ void Vertex::draw(DrawData &drawData)
     }
 }
 
-void Vertex::transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix)
+void Vertex::transform(QMatrix4x4 &matrix)
 {
-    _positionTransformed = absolute ? (matrix * _positionOriginal) : (matrix * _positionTransformed);
-    matrix               = preprocessMatrix ? matrix : matrix.inverted().transposed();
-
-    _normalTransformed   = absolute ? (matrix * _normalOriginal) : (matrix * _normalTransformed);
-    _uTangentTransformed = absolute ? (matrix * _uTangentOriginal) : (matrix * _uTangentTransformed);
-    _vTangentTransformed = absolute ? (matrix * _vTangentOriginal) : (matrix * _vTangentTransformed);
-}
-
-void Vertex::transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix)
-{
-    QVector3D position = absolute ? _positionOriginal : _positionTransformed;
-    position -= center;
-    position = matrix * position;
-    position += center;
-
-    _positionTransformed = position;
-
-    QMatrix4x4 normalMatrix = preprocessMatrix ? matrix.inverted().transposed() : matrix;
-    normalMatrix.setColumn(3, QVector4D(0, 0, 0, 1));
-
-    _normalTransformed   = absolute ? (normalMatrix * _normalOriginal) : (normalMatrix * _normalTransformed);
-    _uTangentTransformed = absolute ? (normalMatrix * _uTangentOriginal) : (normalMatrix * _uTangentTransformed);
-    _vTangentTransformed = absolute ? (normalMatrix * _vTangentOriginal) : (normalMatrix * _vTangentTransformed);
+    _positionTransformed = matrix * _positionOriginal;
+    _normalTransformed   = matrix * _normalOriginal;
+    _uTangentTransformed = matrix * _uTangentOriginal;
+    _vTangentTransformed = matrix * _vTangentOriginal;
 }

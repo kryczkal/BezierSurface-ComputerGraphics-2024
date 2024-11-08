@@ -11,10 +11,8 @@ class DrawData;
 class QGraphicsEngineDrawable
 {
     public:
-    virtual void draw(DrawData &drawData)                                                           = 0;
-    virtual void transform(QMatrix4x4 &matrix, bool absolute = false, bool preprocessMatrix = true) = 0;
-    virtual void
-    transform(QMatrix4x4 &matrix, QVector3D center, bool absolute = false, bool preprocessMatrix = true) = 0;
+    virtual void draw(DrawData &drawData)      = 0;
+    virtual void transform(QMatrix4x4 &matrix) = 0;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINEDRAWABLE_H

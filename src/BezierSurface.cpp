@@ -102,6 +102,7 @@ void BezierSurface::map3dBezierFrom2dMesh()
 
     qDebug() << "Centering and scaling mesh to:" << lowerBound << "-" << upperBound;
 
+    QVector3D center3D;
     for (auto &triangle : _triangles)
     {
         for (int i = 0; i < 3; i++)
@@ -112,6 +113,7 @@ void BezierSurface::map3dBezierFrom2dMesh()
             QVector3D scaledPosition   = (originalPosition - QVector3D(minX, minY, 0)) * QVector3D(scaleX, scaleY, 1) +
                                        QVector3D(offset, offset, 0);
             vertex.setPositionOriginal(scaledPosition);
+            center3D += scaledPosition;
 
             QVector3D uTangent = vertex.getUTangentOriginal() * QVector3D(scaleX, scaleX, scaleX).normalized();
             QVector3D vTangent = vertex.getVTangentOriginal() * QVector3D(scaleY, scaleY, scaleY).normalized();
@@ -123,6 +125,9 @@ void BezierSurface::map3dBezierFrom2dMesh()
             vertex.setNormalOriginal(normal);
         }
     }
+    center3D /= _triangles.size() * 3;
+    _position = QVector3D(0.5, 0.5, center3D.z());
+    qDebug() << "Center:" << center3D;
 }
 
 void BezierSurface::evaluateBezierSurface(Vertex &vertex) const

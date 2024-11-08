@@ -50,22 +50,18 @@ void Mesh::draw(DrawData &drawData)
     }
 }
 
-void Mesh::transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix)
+void Mesh::transform(QMatrix4x4 &matrix)
 {
-    matrix           = preprocessMatrix ? matrix : matrix.inverted().transposed();
-    preprocessMatrix = false;
-    for (auto &triangle : _triangles)
-    {
-        triangle.transform(matrix, absolute, preprocessMatrix);
-    }
-}
+    QMatrix4x4 translateToOrigin;
+    translateToOrigin.translate(-_position);
 
-void Mesh::transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix)
-{
-    matrix           = preprocessMatrix ? matrix : matrix.inverted().transposed();
-    preprocessMatrix = false;
+    QMatrix4x4 translateBack;
+    translateBack.translate(_position);
+
+    _modelMatrix = translateBack * matrix * translateToOrigin;
+
     for (auto &triangle : _triangles)
     {
-        triangle.transform(matrix, center, absolute, preprocessMatrix);
+        triangle.transform(_modelMatrix);
     }
 }

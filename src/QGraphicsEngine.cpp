@@ -82,9 +82,9 @@ void QGraphicsEngine::draw()
     update();
 }
 
-void QGraphicsEngine::setRotationZ(float rotationZ)
+void QGraphicsEngine::setRotationX(float rotationX)
 {
-    _rotationZ = rotationZ;
+    _rotationX = rotationX;
     rotate(_rotationX, _rotationY, _rotationZ);
 }
 
@@ -94,9 +94,9 @@ void QGraphicsEngine::setRotationY(float rotationY)
     rotate(_rotationX, _rotationY, _rotationZ);
 }
 
-void QGraphicsEngine::setRotationX(float rotationX)
+void QGraphicsEngine::setRotationZ(float rotationZ)
 {
-    _rotationX = rotationX;
+    _rotationZ = rotationZ;
     rotate(_rotationX, _rotationY, _rotationZ);
 }
 
@@ -108,12 +108,10 @@ void QGraphicsEngine::rotate(float x, float y, float z)
     rotationMatrix.rotate(y, 0, 1, 0);
     rotationMatrix.rotate(z, 0, 0, 1);
 
-    QVector3D center(0.0f, 0.5f, 0.0f);
-
     QMutexLocker locker(&_drawMutex);
     for (auto &drawable : _drawables)
     {
-        drawable->transform(rotationMatrix, center, true);
+        drawable->transform(rotationMatrix);
     }
     draw();
 }

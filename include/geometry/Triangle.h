@@ -26,8 +26,7 @@ class Triangle : public QGraphicsEngineDrawable
 
     // Public Methods
     void draw(DrawData &drawData) override;
-    void transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix) override;
-    void transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix) override;
+    void transform(QMatrix4x4 &matrix) override;
 
     // Operators
     Vertex &operator[](int i);

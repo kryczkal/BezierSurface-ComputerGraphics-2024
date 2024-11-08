@@ -28,11 +28,11 @@ class Mesh : public QGraphicsEngineDrawable
 
     // Public Methods
     void draw(DrawData &drawData) override;
-    void transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix) override;
-    void transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix) override;
+    void transform(QMatrix4x4 &matrix) override;
 
     protected:
-    QMatrix4x4 modelMatrix;
+    QVector3D _position;
+    QMatrix4x4 _modelMatrix;
     QVector<Triangle> _triangles;
 };
 

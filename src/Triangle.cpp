@@ -134,7 +134,9 @@ void Triangle::draw(DrawData &drawData)
             // z Test
             qreal z = w0 * z0 + w1 * z1 + w2 * z2;
             if (z < drawData.zBuffer[x][y])
+            {
                 continue;
+            }
 
             drawData.zBuffer[x][y] = z;
             if (settings.triangleSettings.debugDraw)
@@ -148,20 +150,9 @@ void Triangle::draw(DrawData &drawData)
     }
 }
 
-void Triangle::transform(QMatrix4x4 &matrix, bool absolute, bool preprocessMatrix)
+void Triangle::transform(QMatrix4x4 &matrix)
 {
-    matrix           = preprocessMatrix ? matrix.inverted().transposed() : matrix;
-    preprocessMatrix = false;
-    _a.transform(matrix, absolute, preprocessMatrix);
-    _b.transform(matrix, absolute, preprocessMatrix);
-    _c.transform(matrix, absolute, preprocessMatrix);
-}
-
-void Triangle::transform(QMatrix4x4 &matrix, QVector3D center, bool absolute, bool preprocessMatrix)
-{
-    matrix           = preprocessMatrix ? matrix.inverted().transposed() : matrix;
-    preprocessMatrix = false;
-    _a.transform(matrix, center, absolute, preprocessMatrix);
-    _b.transform(matrix, center, absolute, preprocessMatrix);
-    _c.transform(matrix, center, absolute, preprocessMatrix);
+    _a.transform(matrix);
+    _b.transform(matrix);
+    _c.transform(matrix);
 }
