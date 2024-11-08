@@ -115,14 +115,14 @@ void BezierSurface::map3dBezierFrom2dMesh()
             vertex.setPositionOriginal(scaledPosition);
             center3D += scaledPosition;
 
-            QVector3D uTangent = vertex.getUTangentOriginal() * QVector3D(scaleX, scaleX, scaleX).normalized();
-            QVector3D vTangent = vertex.getVTangentOriginal() * QVector3D(scaleY, scaleY, scaleY).normalized();
+            QVector3D uTangent = vertex.getUTangentOriginal().normalized() * QVector3D(scaleX, scaleX, scaleX);
+            QVector3D vTangent = vertex.getVTangentOriginal().normalized() * QVector3D(scaleY, scaleY, scaleY);
 
-            QVector3D normal = QVector3D::crossProduct(uTangent, vTangent).normalized();
+            QVector3D normal = QVector3D::crossProduct(uTangent, vTangent);
 
-            vertex.setUTangentOriginal(uTangent);
-            vertex.setVTangentOriginal(vTangent);
-            vertex.setNormalOriginal(normal);
+            vertex.setUTangentOriginal(uTangent.normalized());
+            vertex.setVTangentOriginal(vTangent.normalized());
+            vertex.setNormalOriginal(normal.normalized());
         }
     }
     center3D /= _triangles.size() * 3;
