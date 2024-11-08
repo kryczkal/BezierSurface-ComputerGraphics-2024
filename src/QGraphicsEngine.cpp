@@ -2,6 +2,8 @@
 // Created by wookie on 11/7/24.
 //
 #include "graphics/QGraphicsEngine.h"
+#include "models/DrawData.h"
+#include "utils/Settings.h"
 #include <QColor>
 #include <QMutex>
 #include <QPainter>
@@ -14,7 +16,7 @@
 QGraphicsEngine::QGraphicsEngine(int width, int height)
     : _width(width), _height(height) {
   _qImage = QImage(_width, _height, QImage::Format_ARGB32);
-  _qImage.fill(Qt::darkRed);
+  _qImage.fill(Settings::getInstance().backgroundColor);
 }
 
 QRectF QGraphicsEngine::boundingRect() const {
@@ -61,4 +63,24 @@ int QGraphicsEngine::getHeight() const {
 
 QImage QGraphicsEngine::getQImage() const {
     return _qImage;
+}
+
+void QGraphicsEngine::addDrawable(QSharedPointer<QGraphicsEngineDrawable>& drawable) {
+    QMutexLocker locker(&_drawMutex);
+    _drawables.append(drawable);
+}
+
+void QGraphicsEngine::clearDrawables() {
+    _drawables.clear();
+}
+
+void QGraphicsEngine::draw() {
+    QMutexLocker locker(&_drawMutex);
+    DrawData drawData(_qImage, Qt::darkRed);
+
+    for (auto &drawable : _drawables) {
+        drawable->draw(drawData);
+    }
+
+    update();
 }

@@ -11,7 +11,7 @@
 
 class BezierSurface : public Mesh {
 public:
-    explicit BezierSurface(const QString &filename, const int tessellationLevel = 10);
+    explicit BezierSurface(const QString &filename, int tessellationLevel = -1);
 
     [[maybe_unused]] [[nodiscard]] QVector<QVector3D> getControlPoints() const;
 

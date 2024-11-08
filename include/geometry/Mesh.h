@@ -25,7 +25,7 @@ public:
     static QVector<Triangle> create2dTessellationTriangles(int tessellationLevel);
 
     // Drawing
-    void draw(const QImage &canvas, const QImage &texture) override;
+    void draw(DrawData& drawData) override;
 
 protected:
     QVector<Triangle> _triangles;

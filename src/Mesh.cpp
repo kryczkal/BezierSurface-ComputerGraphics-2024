@@ -2,8 +2,10 @@
 // Created by wookie on 11/7/24.
 //
 
+#include <cmath>
 #include "geometry/Triangle.h"
 #include "geometry/Mesh.h"
+#include "models/DrawData.h"
 
 [[maybe_unused]] Mesh::Mesh(const QVector<Triangle> &triangles) {
     _triangles = triangles;
@@ -23,21 +25,27 @@
 
 QVector<Triangle> Mesh::create2dTessellationTriangles(const int tessellationLevel) {
     QVector<Triangle> triangles;
-    for (int i = 0; i < tessellationLevel; i++) {
-        for (int j = 0; j < tessellationLevel; j++) {
-            Vertex a(i / static_cast<float>(tessellationLevel), j / static_cast<float>(tessellationLevel), 0);
-            Vertex b((i + 1) / static_cast<float>(tessellationLevel), j / static_cast<float>(tessellationLevel), 0);
-            Vertex c(i / static_cast<float>(tessellationLevel), (j + 1) / static_cast<float>(tessellationLevel), 0);
-            Vertex d((i + 1) / static_cast<float>(tessellationLevel), (j + 1) / static_cast<float>(tessellationLevel), 0);
-            triangles.append(Triangle(a, b, c));
-            triangles.append(Triangle(b, c, d));
+    int tessellationLevelX = std::ceil(std::sqrt(tessellationLevel));
+    int tessellationLevelY = std::ceil(std::sqrt(tessellationLevel));
+
+    for (int x = 0; x < tessellationLevelX; x++){
+        for(int y = 0; y < tessellationLevelY; y++) {
+            Vertex a(QVector3D(x / (float)tessellationLevelX, y / (float)tessellationLevelY, 0));
+            Vertex b(QVector3D((x + 1) / (float)tessellationLevelX, y / (float)tessellationLevelY, 0));
+            Vertex c(QVector3D(x / (float)tessellationLevelX, (y + 1) / (float)tessellationLevelY, 0));
+            Vertex d(QVector3D((x + 1) / (float)tessellationLevelX, (y + 1) / (float)tessellationLevelY, 0));
+
+            triangles.push_back(Triangle(a, b, c));
+            triangles.push_back(Triangle(b, c, d));
         }
     }
+
     return triangles;
 }
 
-void Mesh::draw(const QImage &canvas, const QImage &texture) {
-    for (const auto &triangle : _triangles) {
-        triangle.draw(canvas, texture);
+void Mesh::draw(DrawData& drawData) {
+    for (auto &triangle : _triangles) {
+        triangle.draw(drawData);
     }
+
 }

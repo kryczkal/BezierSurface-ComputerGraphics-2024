@@ -6,10 +6,12 @@
 #include <QDebug>
 #include <QFile>
 
-BezierSurface::BezierSurface(const QString &filename, const int tessellationLevel)
+BezierSurface::BezierSurface(const QString &filename, int tessellationLevel)
         : Mesh() {
-    // Each line of the file contains 3 floats separated by a space (x y z)
-    // Each line represents a control point
+    if (tessellationLevel == -1) {
+        tessellationLevel = Settings::getInstance().meshSettings.tessellationLevel;
+    }
+    Q_ASSERT(tessellationLevel >= 0);
 
     readControlPoints(filename);
     _triangles = create2dTessellationTriangles(tessellationLevel);
@@ -22,6 +24,8 @@ BezierSurface::BezierSurface(const QString &filename, const int tessellationLeve
 }
 
 void BezierSurface::readControlPoints(const QString &filename) {
+    // Each line of the file contains 3 floats separated by a space (x y z)
+    // Each line represents a control point
     qDebug() << "Reading control points from file:" << filename;
 
     // Open the file
@@ -68,40 +72,64 @@ void BezierSurface::map3dBezierFrom2dMesh() {
     QVector3D center(0, 0, 0);
 
     qDebug() << "Transforming 2D mesh to 3D";
+
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::min();
+    float maxY = std::numeric_limits<float>::min();
     for(auto &triangle : _triangles) {
         for (int i = 0; i < 3; i++) {
-            Vertex vertex = triangle[i];
+            Vertex &vertex = triangle[i];
             QVector3D position = evaluateBezierSurface(vertex.getPosition().x(), vertex.getPosition().y());
 
             vertex.setPosition(position);
             center += position;
+
+            minX = std::min(minX, position.x());
+            minY = std::min(minY, position.y());
+            maxX = std::max(maxX, position.x());
+            maxY = std::max(maxY, position.y());
         }
     }
-
     center /= static_cast<float>(_triangles.size() * 3);
     qDebug() << "Center:" << center;
+    qDebug() << "Bounding box:" << minX << minY << maxX << maxY;
 
-    qDebug() << "Centering mesh";
+    static constexpr float lowerBound = 0.20;
+    static constexpr float upperBound = 0.80;
+    static constexpr float scale = upperBound - lowerBound;
+    static constexpr float offset = (1 - scale) / 2;
+
+    qDebug() << "Centering and scaling mesh to:" << lowerBound << "-" << upperBound;
+    float scaleX = scale / (maxX - minX);
+    float scaleY = scale / (maxY - minY);
     for(auto &triangle : _triangles) {
         for (int i = 0; i < 3; i++) {
-            Vertex vertex = triangle[i];
-            vertex.setPosition(vertex.getPosition() - center);
+            Vertex &vertex = triangle[i];
+            vertex.setPosition( (vertex.getPosition() - QVector3D(minX, minY, 0)) * QVector3D(scaleX, scaleY, 1) + QVector3D(offset, offset, 0));
         }
     }
-    qDebug() << "Centered mesh";
 }
 
 QVector3D BezierSurface::evaluateBezierSurface(float u, float v) const {
-    int n = 4;
-    QVector<QVector3D> tempPoints = _controlPoints;
+    QVector3D result(0, 0, 0);
 
-    for (int k = 1; k < n; ++k) {
-        for (int i = 0; i < n - k; ++i) {
-            for (int j = 0; j < n - k; ++j) {
-                tempPoints[i * n + j] = (1 - u) * tempPoints[i * n + j] + u * tempPoints[(i + 1) * n + j];
-                tempPoints[i * n + j] = (1 - v) * tempPoints[i * n + j] + v * tempPoints[i * n + j + 1];
-            }
+    // Coefficients for Bernstein polynomials of degree 3
+    float Bu[4] = {(1 - u) * (1 - u) * (1 - u),
+                   3 * u * (1 - u) * (1 - u),
+                   3 * u * u * (1 - u),
+                   u * u * u};
+    float Bv[4] = {(1 - v) * (1 - v) * (1 - v),
+                   3 * v * (1 - v) * (1 - v),
+                   3 * v * v * (1 - v),
+                   v * v * v};
+
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            result += Bu[i] * Bv[j] * _controlPoints[i * 4 + j];
         }
     }
-    return tempPoints[0];
+
+    return result;
 }

@@ -7,6 +7,7 @@
 
 #include <QGraphicsItem>
 #include <QMutex>
+#include "QGraphicsEngineDrawable.h"
 
 class QGraphicsEngine : public QGraphicsItem {
 public:
@@ -23,6 +24,11 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget) override;
 
+    void clearDrawables();
+    void addDrawable(QSharedPointer<QGraphicsEngineDrawable>& drawable);
+
+    void draw();
+
     // Test
     void testPixmap();
 
@@ -31,6 +37,8 @@ private:
     int _height;
     QImage _qImage;
     QMutex _drawMutex;
+    QVector<QSharedPointer<QGraphicsEngineDrawable>> _drawables;
+
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINE_H

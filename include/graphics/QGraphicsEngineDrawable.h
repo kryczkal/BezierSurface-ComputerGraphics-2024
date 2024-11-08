@@ -7,10 +7,11 @@
 
 
 #include <QImage>
+class DrawData;
 
 class QGraphicsEngineDrawable {
 public:
-    virtual void draw(const QImage& canvas, const QImage& texture) = 0;
+    virtual void draw(DrawData& drawData) = 0;
 };
 
 

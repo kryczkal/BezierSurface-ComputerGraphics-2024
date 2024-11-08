@@ -7,6 +7,9 @@
 
 #include "Vertex.h"
 #include "graphics/QGraphicsEngineDrawable.h"
+#include "utils/Settings.h"
+
+class DrawData;
 
 class Triangle : public QGraphicsEngineDrawable {
 public:
@@ -20,10 +23,10 @@ public:
 
     [[maybe_unused]] [[nodiscard]] Vertex getC() const;
 
-    Vertex operator[](int i) const;
+    Vertex& operator[](int i);
 
     // Drawing
-    void draw(const QImage &data, const QImage &texture) override;
+    void draw(DrawData& drawData) override;
 private:
   Vertex _a;
   Vertex _b;

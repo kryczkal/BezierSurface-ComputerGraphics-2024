@@ -15,7 +15,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Include controlPoints.txt in the build directory
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/controlPoints.txt ${CMAKE_CURRENT_BINARY_DIR}/controlPoints.txt COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/controlPointsWavy.txt ${CMAKE_CURRENT_BINARY_DIR}/controlPointsWavy.txt COPYONLY)
 
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" include/*.h)
 set(PROJECT_SOURCES
