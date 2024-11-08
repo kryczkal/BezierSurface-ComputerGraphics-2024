@@ -81,7 +81,7 @@ void BezierSurface::map3dBezierFrom2dMesh()
     {
         for (int i = 0; i < 3; i++)
         {
-            Vertex &vertex     = triangle[i];
+            Vertex &vertex = triangle[i];
             evaluateBezierSurface(vertex);
 
             minX = std::min(minX, vertex.getPositionOriginal().x());
@@ -109,7 +109,7 @@ void BezierSurface::map3dBezierFrom2dMesh()
             Vertex &vertex = triangle[i];
 
             QVector3D originalPosition = vertex.getPositionOriginal();
-            QVector3D scaledPosition = (originalPosition - QVector3D(minX, minY, 0)) * QVector3D(scaleX, scaleY, 1) +
+            QVector3D scaledPosition   = (originalPosition - QVector3D(minX, minY, 0)) * QVector3D(scaleX, scaleY, 1) +
                                        QVector3D(offset, offset, 0);
             vertex.setPositionOriginal(scaledPosition);
 

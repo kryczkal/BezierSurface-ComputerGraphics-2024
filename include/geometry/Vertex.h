@@ -11,8 +11,10 @@ class Vertex
 {
     public:
     // Constructors
-    explicit Vertex(QVector3D position, QVector3D normal = QVector3D(0, 0, 0), QVector3D uTangent = QVector3D(0, 0, 0),
-                    QVector3D vTangent = QVector3D(0, 0, 0));
+    explicit Vertex(
+        QVector3D position, QVector3D normal = QVector3D(0, 0, 0), QVector3D uTangent = QVector3D(0, 0, 0),
+        QVector3D vTangent = QVector3D(0, 0, 0)
+    );
 
     // Copy constructor
     Vertex(const Vertex &) = default;
@@ -28,15 +30,31 @@ class Vertex
     [[maybe_unused]] [[nodiscard]] QVector3D getUTangentTransformed() const { return _uTangentTransformed; }
     [[maybe_unused]] [[nodiscard]] QVector3D getVTangentTransformed() const { return _vTangentTransformed; }
 
-    [[maybe_unused]] void setPositionOriginal(const QVector3D& vector3D) { _positionOriginal = vector3D; _positionTransformed = vector3D; }
-    [[maybe_unused]] void setNormalOriginal(const QVector3D& vector3D) { _normalOriginal = vector3D; _normalTransformed = vector3D; }
-    [[maybe_unused]] void setUTangentOriginal(const QVector3D& vector3D) { _uTangentOriginal = vector3D; _uTangentTransformed = vector3D; }
-    [[maybe_unused]] void setVTangentOriginal(const QVector3D& vector3D) { _vTangentOriginal = vector3D; _vTangentTransformed = vector3D; }
+    [[maybe_unused]] void setPositionOriginal(const QVector3D &vector3D)
+    {
+        _positionOriginal    = vector3D;
+        _positionTransformed = vector3D;
+    }
+    [[maybe_unused]] void setNormalOriginal(const QVector3D &vector3D)
+    {
+        _normalOriginal    = vector3D;
+        _normalTransformed = vector3D;
+    }
+    [[maybe_unused]] void setUTangentOriginal(const QVector3D &vector3D)
+    {
+        _uTangentOriginal    = vector3D;
+        _uTangentTransformed = vector3D;
+    }
+    [[maybe_unused]] void setVTangentOriginal(const QVector3D &vector3D)
+    {
+        _vTangentOriginal    = vector3D;
+        _vTangentTransformed = vector3D;
+    }
 
-    [[maybe_unused]] void setPositionTransformed(const QVector3D& vector3D) { _positionTransformed = vector3D; }
-    [[maybe_unused]] void setNormalTransformed(const QVector3D& vector3D) { _normalTransformed = vector3D; }
-    [[maybe_unused]] void setUTangentTransformed(const QVector3D& vector3D) { _uTangentTransformed = vector3D; }
-    [[maybe_unused]] void setVTangentTransformed(const QVector3D& vector3D) { _vTangentTransformed = vector3D; }
+    [[maybe_unused]] void setPositionTransformed(const QVector3D &vector3D) { _positionTransformed = vector3D; }
+    [[maybe_unused]] void setNormalTransformed(const QVector3D &vector3D) { _normalTransformed = vector3D; }
+    [[maybe_unused]] void setUTangentTransformed(const QVector3D &vector3D) { _uTangentTransformed = vector3D; }
+    [[maybe_unused]] void setVTangentTransformed(const QVector3D &vector3D) { _vTangentTransformed = vector3D; }
 
     [[maybe_unused]] [[nodiscard]] float getU() const { return _u; }
     [[maybe_unused]] [[nodiscard]] float getV() const { return _v; }
