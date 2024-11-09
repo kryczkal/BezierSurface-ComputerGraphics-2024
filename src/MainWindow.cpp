@@ -100,6 +100,84 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         }
     );
 
+    QGroupBox *lightSettingsBox      = new QGroupBox();
+    QVBoxLayout *lightSettingsLayout = new QVBoxLayout(lightSettingsBox);
+    lightSettingsLayout->setSpacing(5);
+
+    QLabel *kdLabel   = new QLabel("Kd Coef");
+    QSlider *kdSlider = new QSlider(Qt::Horizontal);
+    kdSlider->setRange(0, 100);
+    kdSlider->setValue(50);
+    kdSlider->setTickInterval(10);
+    kdSlider->setTickPosition(QSlider::TicksBelow);
+    lightSettingsLayout->addWidget(kdLabel);
+    lightSettingsLayout->addWidget(kdSlider);
+    connect(
+        kdSlider, &QSlider::valueChanged,
+        [centralWidget](int value)
+        {
+            Settings &settings            = Settings::getInstance();
+            settings.lightSettings.kdCoef = value / 100.0f;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
+    QLabel *ksLabel   = new QLabel("Ks Coef");
+    QSlider *ksSlider = new QSlider(Qt::Horizontal);
+    ksSlider->setRange(0, 100);
+    ksSlider->setValue(50);
+    ksSlider->setTickInterval(10);
+    ksSlider->setTickPosition(QSlider::TicksBelow);
+    lightSettingsLayout->addWidget(ksLabel);
+    lightSettingsLayout->addWidget(ksSlider);
+    connect(
+        ksSlider, &QSlider::valueChanged,
+        [centralWidget](int value)
+        {
+            Settings &settings            = Settings::getInstance();
+            settings.lightSettings.ksCoef = value / 100.0f;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
+    QLabel *mLabel   = new QLabel("M");
+    QSlider *mSlider = new QSlider(Qt::Horizontal);
+    mSlider->setRange(0, 40);
+    mSlider->setValue(8);
+    mSlider->setTickInterval(1);
+    mSlider->setTickPosition(QSlider::TicksBelow);
+    lightSettingsLayout->addWidget(mLabel);
+    lightSettingsLayout->addWidget(mSlider);
+    connect(
+        mSlider, &QSlider::valueChanged,
+        [centralWidget](int value)
+        {
+            Settings &settings       = Settings::getInstance();
+            settings.lightSettings.m = value;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
+    leftToolbarLayout->addWidget(lightSettingsBox);
+
     // Add a vertical spacer to push items to the top
     QSpacerItem *verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
@@ -177,7 +255,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     QSharedPointer<QGraphicsEngineDrawable> drawable =
         QSharedPointer<QGraphicsEngineDrawable>(new BezierSurface("crazy.txt"));
+    QSharedPointer<LightSource> lightSource = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 0)));
     engine->addDrawable(drawable);
+    engine->addLightSource(lightSource);
     engine->draw();
 
     leftToolbarLayout->setAlignment(Qt::AlignTop);

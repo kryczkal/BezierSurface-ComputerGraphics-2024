@@ -7,7 +7,7 @@
 
 #include "Vertex.h"
 #include "graphics/QGraphicsEngineDrawable.h"
-#include "utils/Settings.h"
+#include "settings/Settings.h"
 
 class DrawData;
 
@@ -18,11 +18,12 @@ class Triangle : public QGraphicsEngineDrawable
     [[maybe_unused]] Triangle(Vertex a, Vertex b, Vertex c);
 
     // Getters
-    [[maybe_unused]] [[nodiscard]] Vertex getA() const;
-
-    [[maybe_unused]] [[nodiscard]] Vertex getB() const;
-
-    [[maybe_unused]] [[nodiscard]] Vertex getC() const;
+    [[maybe_unused]] [[nodiscard]] Vertex &getA() { return _a; }
+    [[maybe_unused]] [[nodiscard]] Vertex &getB() { return _b; }
+    [[maybe_unused]] [[nodiscard]] Vertex &getC() { return _c; }
+    [[maybe_unused]] [[nodiscard]] Vertex getA() const { return _a; }
+    [[maybe_unused]] [[nodiscard]] Vertex getB() const { return _b; }
+    [[maybe_unused]] [[nodiscard]] Vertex getC() const { return _c; }
 
     // Public Methods
     void draw(DrawData &drawData) override;

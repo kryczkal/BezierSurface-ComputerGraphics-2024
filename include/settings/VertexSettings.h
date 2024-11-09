@@ -11,8 +11,9 @@ class VertexSettings
 {
     public:
     // Vertices
-    float radiusCoef = 0.005f;
-    float offset     = 0.05f;
+    float radiusCoef   = 0.005f;
+    float offset       = 0.05f;
+    QColor vertexColor = QColor(255, 0, 0, 255);
 
     // Normals
     bool drawNormals   = false;

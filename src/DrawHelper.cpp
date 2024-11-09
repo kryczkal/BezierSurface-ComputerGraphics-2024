@@ -2,11 +2,12 @@
 // Created by wookie on 11/8/24.
 //
 
-#include "utils/DrawHelper.h"
+#include "utils/DrawUtils.h"
+#include <QDebug>
 #include <QVector3D>
 #include <cmath>
 
-void DrawHelper::drawLine(
+void DrawUtils::drawLine(
     DrawData &drawData, const QVector3D &start, const QVector3D &end, const QColor &color, float width
 )
 {
@@ -64,6 +65,25 @@ void DrawHelper::drawLine(
         {
             err += dx;
             y0 += sy;
+        }
+    }
+}
+
+void DrawUtils::drawPoint(DrawData &drawData, const QVector3D &point, const QColor &color, int radiusX, int radiusY)
+{
+    int x = point.x() * drawData.canvas.width();
+    int y = point.y() * drawData.canvas.height();
+    for (int xm = x - radiusX; xm <= x + radiusX; ++xm)
+    {
+        for (int ym = y - radiusY; ym <= y + radiusY; ++ym)
+        {
+            if (xm >= 0 && xm < drawData.canvas.width() && ym >= 0 && ym < drawData.canvas.height())
+            {
+                if (point.z() < drawData.zBuffer[xm][ym])
+                    continue;
+                drawData.zBuffer[xm][ym] = point.z();
+                drawData.canvas.setPixelColor(xm, ym, color);
+            }
         }
     }
 }

@@ -3,8 +3,10 @@
 //
 #include "graphics/QGraphicsEngine.h"
 #include "models/DrawData.h"
-#include "utils/Settings.h"
+#include "settings/Settings.h"
+#include "utils/VectorMovementUtils.h"
 #include <QColor>
+#include <QDateTime>
 #include <QMatrix4x4>
 #include <QMutex>
 #include <QPainter>
@@ -70,14 +72,22 @@ void QGraphicsEngine::clearDrawables() { _drawables.clear(); }
 
 void QGraphicsEngine::draw()
 {
-    //    QMutexLocker locker(&_drawMutex);
     _qImage.fill(Settings::getInstance().graphicsEngineSettings.backgroundColor);
     DrawData drawData(_qImage, Qt::darkRed);
+    drawData.lightSource = _lightSources.size() > 0 ? _lightSources[0].data() : nullptr;
 
+    //    QMutexLocker locker(&_drawMutex);
     for (auto &drawable : _drawables)
     {
         drawable->draw(drawData);
     }
+
+    for (auto &lightSource : _lightSources)
+    {
+        lightSource->draw(drawData);
+    }
+
+    autoMoveLightSources();
 
     update();
 }
@@ -114,4 +124,25 @@ void QGraphicsEngine::rotate(float x, float y, float z)
         drawable->transform(rotationMatrix);
     }
     draw();
+}
+
+void QGraphicsEngine::addLightSource(QSharedPointer<LightSource> lightSource)
+{
+    QMutexLocker locker(&_drawMutex);
+    _lightSources.append(lightSource);
+}
+
+void QGraphicsEngine::clearLightSources()
+{
+    QMutexLocker locker(&_drawMutex);
+    _lightSources.clear();
+}
+
+void QGraphicsEngine::autoMoveLightSources()
+{
+    for (auto &lightSource : _lightSources)
+    {
+        QVector3D &position = lightSource->getPosition();
+        VectorMovementUtils::moveAcrossCircle(position, QVector3D(0.5f, 0.5f, -3), 0.5f, 0.01f);
+    }
 }

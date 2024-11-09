@@ -6,6 +6,7 @@
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_SETTINGS_H
 
 #include "GraphicsEngineSettings.h"
+#include "LightSettings.h"
 #include "MeshSettings.h"
 #include "TriangleSettings.h"
 #include "VertexSettings.h"
@@ -24,6 +25,7 @@ class Settings
     MeshSettings meshSettings;
     GraphicsEngineSettings graphicsEngineSettings;
     VertexSettings vertexSettings;
+    LightSettings lightSettings;
 
     private:
     Settings()                       = default;

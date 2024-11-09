@@ -5,6 +5,7 @@
 #ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_DRAWDATA_H
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_DRAWDATA_H
 
+#include "graphics/LightSource.h"
 #include <QImage>
 #include <QVariant>
 
@@ -16,6 +17,7 @@ class DrawData
     QImage &canvas;
     QVariant textureOrBrushColor;
     QVector<QVector<float>> zBuffer;
+    LightSource *lightSource = nullptr;
 
     void clearZBuffer();
 
@@ -27,9 +29,10 @@ class DrawData
 
     void setBrushColor(const QColor &color);
 
+    void setLightSource(LightSource *lightSource) { this->lightSource = lightSource; }
+
     private:
-    int X = 800;
-    int Y = 600;
+    int X, Y;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_DRAWDATA_H

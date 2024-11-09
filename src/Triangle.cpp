@@ -5,18 +5,12 @@
 #include "geometry/Triangle.h"
 #include "geometry/Vertex.h"
 #include "models/DrawData.h"
-#include "utils/Settings.h"
+#include "settings/Settings.h"
 #include <QDebug>
 #include <QMatrix4x4>
 #include <cmath>
 
 [[maybe_unused]] Triangle::Triangle(Vertex a, Vertex b, Vertex c) : _a(a), _b(b), _c(c) {}
-
-[[maybe_unused]] Vertex Triangle::getA() const { return _a; }
-
-[[maybe_unused]] Vertex Triangle::getB() const { return _b; }
-
-[[maybe_unused]] Vertex Triangle::getC() const { return _c; }
 
 Vertex &Triangle::operator[](int i)
 {
@@ -43,6 +37,10 @@ void Triangle::draw(DrawData &drawData)
     QVector3D posA = _a.getPositionTransformed();
     QVector3D posB = _b.getPositionTransformed();
     QVector3D posC = _c.getPositionTransformed();
+
+    QVector3D normalA = _a.getNormalTransformed().normalized();
+    QVector3D normalB = _b.getNormalTransformed().normalized();
+    QVector3D normalC = _c.getNormalTransformed().normalized();
 
     int width  = drawData.canvas.width();
     int height = drawData.canvas.height();
@@ -86,12 +84,57 @@ void Triangle::draw(DrawData &drawData)
         _c.draw(drawData);
     }
 
-    static constexpr auto drawPixel = [](DrawData &drawData, int y, int x)
+    static constexpr auto drawPixel = [](DrawData &drawData, QVector3D pos, QVector3D normal, int y, int x)
     {
+        Settings &settings = Settings::getInstance();
         if (drawData.textureOrBrushColor.canConvert<QColor>())
         {
             QColor color = drawData.textureOrBrushColor.value<QColor>();
-            drawData.canvas.setPixelColor(x, y, color);
+            if (drawData.lightSource)
+            {
+                float IO_r = color.redF();
+                float IO_g = color.greenF();
+                float IO_b = color.blueF();
+
+                QColor lightColor = drawData.lightSource->getColor();
+                float IL_r        = lightColor.redF();
+                float IL_g        = lightColor.greenF();
+                float IL_b        = lightColor.blueF();
+
+                QVector3D L = drawData.lightSource->calcVersorTo(pos).normalized();
+
+                QVector3D N = normal;
+
+                QVector3D V(0.0f, 0.0f, 1.0f);
+
+                float cosNL = -QVector3D::dotProduct(N, L);
+                cosNL       = std::max(0.0f, cosNL);
+
+                QVector3D R = (2.0f * cosNL * N - L).normalized();
+                float cosVR = -QVector3D::dotProduct(V.normalized(), R);
+                cosVR       = std::max(0.0f, cosVR);
+
+                float kd = settings.lightSettings.kdCoef;
+                float ks = settings.lightSettings.ksCoef;
+                float m  = settings.lightSettings.m;
+
+                // Compute I for each component
+                float r = kd * IL_r * IO_r * cosNL + ks * IL_r * IO_r * std::pow(cosVR, m);
+                float g = kd * IL_g * IO_g * cosNL + ks * IL_g * IO_g * std::pow(cosVR, m);
+                float b = kd * IL_b * IO_b * cosNL + ks * IL_b * IO_b * std::pow(cosVR, m);
+
+                // Clamp values to [0,1]
+                r = std::min(1.0f, r);
+                g = std::min(1.0f, g);
+                b = std::min(1.0f, b);
+
+                color = QColor::fromRgbF(r, g, b);
+                drawData.canvas.setPixelColor(x, y, color);
+            }
+            else
+            {
+                drawData.canvas.setPixelColor(x, y, color);
+            }
         }
         else
         {
@@ -139,13 +182,20 @@ void Triangle::draw(DrawData &drawData)
             }
 
             drawData.zBuffer[x][y] = z;
+
             if (settings.triangleSettings.debugDraw)
             {
                 drawPixelDebug(drawData, settings, y, x, w0, w1, w2);
                 continue;
             }
 
-            drawPixel(drawData, y, x);
+            // Compute interpolated position
+            QVector3D pos = w0 * posA + w1 * posB + w2 * posC;
+
+            // Compute interpolated normal
+            QVector3D normal = (w0 * normalA + w1 * normalB + w2 * normalC).normalized();
+
+            drawPixel(drawData, pos, normal, y, x);
         }
     }
 }

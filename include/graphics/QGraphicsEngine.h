@@ -5,6 +5,7 @@
 #ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINE_H
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINE_H
 
+#include "LightSource.h"
 #include "QGraphicsEngineDrawable.h"
 #include <QGraphicsItem>
 #include <QMutex>
@@ -33,6 +34,10 @@ class QGraphicsEngine : public QGraphicsItem
     void clearDrawables();
     void addDrawable(QSharedPointer<QGraphicsEngineDrawable> &drawable);
     void draw();
+    /// Light
+    void addLightSource(QSharedPointer<LightSource> lightSource);
+    void clearLightSources();
+    void autoMoveLightSources();
 
     // Test Methods
     void testPixmap();
@@ -51,6 +56,7 @@ class QGraphicsEngine : public QGraphicsItem
     QImage _qImage;
     QMutex _drawMutex;
     QVector<QSharedPointer<QGraphicsEngineDrawable>> _drawables;
+    QVector<QSharedPointer<LightSource>> _lightSources;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINE_H

@@ -22,15 +22,15 @@ class Vertex : public QGraphicsEngineDrawable
     Vertex(const Vertex &) = default;
 
     // Getters
-    [[maybe_unused]] [[nodiscard]] QVector3D getPositionOriginal() const { return _positionOriginal; }
-    [[maybe_unused]] [[nodiscard]] QVector3D getNormalOriginal() const { return _normalOriginal; }
-    [[maybe_unused]] [[nodiscard]] QVector3D getUTangentOriginal() const { return _uTangentOriginal; }
-    [[maybe_unused]] [[nodiscard]] QVector3D getVTangentOriginal() const { return _vTangentOriginal; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getPositionOriginal() { return _positionOriginal; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getNormalOriginal() { return _normalOriginal; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getUTangentOriginal() { return _uTangentOriginal; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getVTangentOriginal() { return _vTangentOriginal; }
 
-    [[maybe_unused]] [[nodiscard]] QVector3D getPositionTransformed() const { return _positionTransformed; }
-    [[maybe_unused]] [[nodiscard]] QVector3D getNormalTransformed() const { return _normalTransformed; }
-    [[maybe_unused]] [[nodiscard]] QVector3D getUTangentTransformed() const { return _uTangentTransformed; }
-    [[maybe_unused]] [[nodiscard]] QVector3D getVTangentTransformed() const { return _vTangentTransformed; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getPositionTransformed() { return _positionTransformed; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getNormalTransformed() { return _normalTransformed; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getUTangentTransformed() { return _uTangentTransformed; }
+    [[maybe_unused]] [[nodiscard]] QVector3D &getVTangentTransformed() { return _vTangentTransformed; }
 
     [[maybe_unused]] void setPositionOriginal(const QVector3D &vector3D)
     {
