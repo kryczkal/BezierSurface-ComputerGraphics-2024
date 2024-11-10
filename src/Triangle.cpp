@@ -6,8 +6,10 @@
 #include "geometry/Vertex.h"
 #include "models/DrawData.h"
 #include "settings/Settings.h"
+#include <QColor>
 #include <QDebug>
 #include <QMatrix4x4>
+#include <QVector2D>
 #include <cmath>
 
 [[maybe_unused]] Triangle::Triangle(Vertex a, Vertex b, Vertex c) : _a(a), _b(b), _c(c) {}
@@ -34,18 +36,17 @@ void Triangle::draw(DrawData &drawData)
 {
     Settings &settings = Settings::getInstance();
 
-    QVector3D posA = _a.getPositionTransformed();
-    QVector3D posB = _b.getPositionTransformed();
-    QVector3D posC = _c.getPositionTransformed();
+    QVector3D &posA = _a.getPositionTransformed();
+    QVector3D &posB = _b.getPositionTransformed();
+    QVector3D &posC = _c.getPositionTransformed();
 
-    QVector3D normalA = _a.getNormalTransformed().normalized();
-    QVector3D normalB = _b.getNormalTransformed().normalized();
-    QVector3D normalC = _c.getNormalTransformed().normalized();
+    QVector3D &normalA = _a.getNormalTransformed();
+    QVector3D &normalB = _b.getNormalTransformed();
+    QVector3D &normalC = _c.getNormalTransformed();
 
     int width  = drawData.canvas.width();
     int height = drawData.canvas.height();
 
-    // Map 3D positions to 2D by ignoring the z-coordinate
     qreal x0 = posA.x() * width;
     qreal y0 = posA.y() * height;
     qreal z0 = posA.z();
@@ -58,25 +59,70 @@ void Triangle::draw(DrawData &drawData)
     qreal y2 = posC.y() * height;
     qreal z2 = posC.z();
 
-    // Compute the bounding box of the triangle
-    int minX = std::floor(std::min({x0, x1, x2}));
-    int maxX = std::ceil(std::max({x0, x1, x2}));
-    int minY = std::floor(std::min({y0, y1, y2}));
-    int maxY = std::ceil(std::max({y0, y1, y2}));
+    struct Vertex
+    {
+        qreal x, y, z;
+        QVector3D pos;
+        QVector3D normal;
+    };
 
-    // Clamp the bounding box to the canvas size
-    minX = std::max(0, minX);
-    maxX = std::min(width - 1, maxX);
+    std::array<Vertex, 3> vertices = {
+        {{x0, y0, z0, posA, normalA}, {x1, y1, z1, posB, normalB}, {x2, y2, z2, posC, normalC}}
+    };
+
+    std::sort(
+        vertices.begin(), vertices.end(),
+        [](const Vertex &a, const Vertex &b)
+        {
+            return a.y < b.y;
+        }
+    );
+
+    struct Edge
+    {
+        qreal x;       // Current x-coordinate
+        qreal xStep;   // Change in x per scan-line
+        int yStart;    // Starting y-coordinate
+        int yEnd;      // Ending y-coordinate
+        Vertex vStart; // Starting vertex
+        Vertex vEnd;   // Ending vertex
+    };
+
+    auto createEdge = [](const Vertex &v1, const Vertex &v2) -> Edge
+    {
+        int yStart  = static_cast<int>(std::ceil(v1.y));
+        int yEnd    = static_cast<int>(std::ceil(v2.y)) - 1;
+        qreal dy    = v2.y - v1.y;
+        qreal dx    = v2.x - v1.x;
+        qreal xStep = (dy != 0) ? dx / dy : 0.0;
+        qreal x     = v1.x + (yStart - v1.y) * xStep;
+        return {x, xStep, yStart, yEnd, v1, v2};
+    };
+
+    Edge edges[3] = {
+        createEdge(vertices[0], vertices[1]), createEdge(vertices[1], vertices[2]), createEdge(vertices[0], vertices[2])
+    };
+
+    int minY = static_cast<int>(std::ceil(vertices[0].y));
+    int maxY = static_cast<int>(std::ceil(vertices[2].y)) - 1;
+
     minY = std::max(0, minY);
     maxY = std::min(height - 1, maxY);
 
-    qreal denom = (y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2);
-    if (denom == 0)
-    {
-        // The triangle is degenerate; no need to draw
-        return;
-    }
+    int tableHeight = maxY - minY + 1;
+    std::vector<Edge> edgeTable[tableHeight];
 
+    for (const auto &edge : edges)
+    {
+        int yStart = std::max(edge.yStart, minY);
+        int yEnd   = std::min(edge.yEnd, maxY);
+
+        for (int y = yStart; y <= yEnd; ++y)
+        {
+            int idx = y - minY;
+            edgeTable[idx].push_back(edge);
+        }
+    }
     if (settings.triangleSettings.debugDraw && drawData.textureOrBrushColor.canConvert<QColor>())
     {
         _a.draw(drawData);
@@ -84,44 +130,35 @@ void Triangle::draw(DrawData &drawData)
         _c.draw(drawData);
     }
 
-    static constexpr auto drawPixel = [](DrawData &drawData, QVector3D pos, QVector3D normal, int y, int x)
+    auto drawPixel = [&](int x, int y, const QVector3D &pos, const QVector3D &normal)
     {
-        Settings &settings = Settings::getInstance();
         if (drawData.textureOrBrushColor.canConvert<QColor>())
         {
             QColor color = drawData.textureOrBrushColor.value<QColor>();
             if (drawData.lightSource)
             {
-                float IO_r = color.redF();
-                float IO_g = color.greenF();
-                float IO_b = color.blueF();
-
+                // Compute lighting
                 QColor lightColor = drawData.lightSource->getColor();
-                float IL_r        = lightColor.redF();
-                float IL_g        = lightColor.greenF();
-                float IL_b        = lightColor.blueF();
-
-                QVector3D L = drawData.lightSource->calcVersorTo(pos).normalized();
-
-                QVector3D N = normal;
-
+                QVector3D L       = drawData.lightSource->calcVersorTo(pos).normalized();
+                QVector3D N       = normal;
                 QVector3D V(0.0f, 0.0f, 1.0f);
 
-                float cosNL = -QVector3D::dotProduct(N, L);
-                cosNL       = std::max(0.0f, cosNL);
+                float cosNL = std::max(0.0f, -QVector3D::dotProduct(N, L));
 
                 QVector3D R = (2.0f * cosNL * N - L).normalized();
-                float cosVR = -QVector3D::dotProduct(V.normalized(), R);
-                cosVR       = std::max(0.0f, cosVR);
+                float cosVR = std::max(0.0f, -QVector3D::dotProduct(V.normalized(), R));
 
                 float kd = settings.lightSettings.kdCoef;
                 float ks = settings.lightSettings.ksCoef;
                 float m  = settings.lightSettings.m;
 
-                // Compute I for each component
-                float r = kd * IL_r * IO_r * cosNL + ks * IL_r * IO_r * std::pow(cosVR, m);
-                float g = kd * IL_g * IO_g * cosNL + ks * IL_g * IO_g * std::pow(cosVR, m);
-                float b = kd * IL_b * IO_b * cosNL + ks * IL_b * IO_b * std::pow(cosVR, m);
+                // Compute intensity for each color component
+                float r = kd * lightColor.redF() * color.redF() * cosNL +
+                          ks * lightColor.redF() * color.redF() * std::pow(cosVR, m);
+                float g = kd * lightColor.greenF() * color.greenF() * cosNL +
+                          ks * lightColor.greenF() * color.greenF() * std::pow(cosVR, m);
+                float b = kd * lightColor.blueF() * color.blueF() * cosNL +
+                          ks * lightColor.blueF() * color.blueF() * std::pow(cosVR, m);
 
                 // Clamp values to [0,1]
                 r = std::min(1.0f, r);
@@ -129,12 +166,8 @@ void Triangle::draw(DrawData &drawData)
                 b = std::min(1.0f, b);
 
                 color = QColor::fromRgbF(r, g, b);
-                drawData.canvas.setPixelColor(x, y, color);
             }
-            else
-            {
-                drawData.canvas.setPixelColor(x, y, color);
-            }
+            drawData.canvas.setPixelColor(x, y, color);
         }
         else
         {
@@ -144,17 +177,15 @@ void Triangle::draw(DrawData &drawData)
         }
     };
 
-    qreal A0 = y1 - y0, B0 = x0 - x1, C0 = x1 * y0 - x0 * y1;
-    qreal A1 = y2 - y1, B1 = x1 - x2, C1 = x2 * y1 - x1 * y2;
-    qreal A2 = y0 - y2, B2 = x2 - x0, C2 = x0 * y2 - x2 * y0;
-
-    auto drawPixelDebug = [&](DrawData &drawData, const Settings &settings, int y, int x, qreal w0, qreal w1, qreal w2)
+    auto drawPixelDebug = [&](int x, int y)
     {
-        qreal dist0 = std::abs(A0 * x + B0 * y + C0) / std::sqrt(A0 * A0 + B0 * B0);
-        qreal dist1 = std::abs(A1 * x + B1 * y + C1) / std::sqrt(A1 * A1 + B1 * B1);
-        qreal dist2 = std::abs(A2 * x + B2 * y + C2) / std::sqrt(A2 * A2 + B2 * B2);
+        //        qreal dist0 = std::abs(A0 * x + B0 * y + C0) / std::sqrt(A0 * A0 + B0 * B0);
+        //        qreal dist1 = std::abs(A1 * x + B1 * y + C1) / std::sqrt(A1 * A1 + B1 * B1);
+        //        qreal dist2 = std::abs(A2 * x + B2 * y + C2) / std::sqrt(A2 * A2 + B2 * B2);
+        //
+        //        qreal minDist = std::min({dist0, dist1, dist2});
 
-        qreal minDist = std::min({dist0, dist1, dist2});
+        qreal minDist = 1.0;
 
         if (minDist <= 0.5)
             drawData.canvas.setPixelColor(x, y, settings.triangleSettings.triangleEdgeColor);
@@ -164,40 +195,87 @@ void Triangle::draw(DrawData &drawData)
 
     for (int y = minY; y <= maxY; ++y)
     {
-        for (int x = minX; x <= maxX; ++x)
+        int idx = y - minY;
+
+        auto &activeEdges = edgeTable[idx];
+        if (activeEdges.size() < 2)
+            continue;
+
+        for (auto &edge : activeEdges)
         {
-            qreal w0 = ((y1 - y2) * (x - x2) + (x2 - x1) * (y - y2)) / denom;
-            qreal w1 = ((y2 - y0) * (x - x2) + (x0 - x2) * (y - y2)) / denom;
-            qreal w2 = 1 - w0 - w1;
+            edge.x = edge.x + edge.xStep * (y - edge.yStart);
+        }
 
-            // Check if the pixel is inside the triangle
-            if (!(w0 >= 0 && w1 >= 0 && w2 >= 0))
-                continue;
-
-            // z Test
-            qreal z = w0 * z0 + w1 * z1 + w2 * z2;
-            if (z < drawData.zBuffer[x][y])
+        std::sort(
+            activeEdges.begin(), activeEdges.end(),
+            [](const Edge &a, const Edge &b)
             {
-                continue;
+                return a.x < b.x;
             }
+        );
 
-            drawData.zBuffer[x][y] = z;
+        for (size_t i = 0; i < activeEdges.size(); i += 2)
+        {
+            if (i + 1 >= activeEdges.size())
+                break;
 
-            if (settings.triangleSettings.debugDraw)
+            int xStart = static_cast<int>(std::ceil(activeEdges[i].x));
+            int xEnd   = static_cast<int>(std::floor(activeEdges[i + 1].x));
+
+            if (xStart > xEnd)
+                continue;
+
+            xStart = std::max(0, xStart);
+            xEnd   = std::min(width - 1, xEnd);
+
+            for (int x = xStart; x <= xEnd; ++x)
             {
-                drawPixelDebug(drawData, settings, y, x, w0, w1, w2);
-                continue;
+                QVector3D barycentric = computeBarycentricCoordinates(
+                    QVector2D(x, y), QVector2D(vertices[0].x, vertices[0].y), QVector2D(vertices[1].x, vertices[1].y),
+                    QVector2D(vertices[2].x, vertices[2].y)
+                );
+
+                if (barycentric.x() < 0 || barycentric.y() < 0 || barycentric.z() < 0)
+                    continue;
+
+                qreal z =
+                    barycentric.x() * vertices[0].z + barycentric.y() * vertices[1].z + barycentric.z() * vertices[2].z;
+
+                if (z < drawData.zBuffer[x][y])
+                    continue;
+                drawData.zBuffer[x][y] = z;
+
+                QVector3D pos = barycentric.x() * vertices[0].pos + barycentric.y() * vertices[1].pos +
+                                barycentric.z() * vertices[2].pos;
+                QVector3D normal = (barycentric.x() * vertices[0].normal + barycentric.y() * vertices[1].normal +
+                                    barycentric.z() * vertices[2].normal)
+                                       .normalized();
+
+                if (settings.triangleSettings.debugDraw)
+                {
+                    drawPixelDebug(x, y);
+                }
+                else
+                {
+                    drawPixel(x, y, pos, normal);
+                }
             }
-
-            // Compute interpolated position
-            QVector3D pos = w0 * posA + w1 * posB + w2 * posC;
-
-            // Compute interpolated normal
-            QVector3D normal = (w0 * normalA + w1 * normalB + w2 * normalC).normalized();
-
-            drawPixel(drawData, pos, normal, y, x);
         }
     }
+}
+
+QVector3D
+Triangle::computeBarycentricCoordinates(const QVector2D &p, const QVector2D &a, const QVector2D &b, const QVector2D &c)
+{
+    qreal denom = (b.y() - c.y()) * (a.x() - c.x()) + (c.x() - b.x()) * (a.y() - c.y());
+    if (denom == 0)
+        return QVector3D(-1, -1, -1);
+
+    qreal w0 = ((b.y() - c.y()) * (p.x() - c.x()) + (c.x() - b.x()) * (p.y() - c.y())) / denom;
+    qreal w1 = ((c.y() - a.y()) * (p.x() - c.x()) + (a.x() - c.x()) * (p.y() - c.y())) / denom;
+    qreal w2 = 1.0 - w0 - w1;
+
+    return QVector3D(w0, w1, w2);
 }
 
 void Triangle::transform(QMatrix4x4 &matrix)

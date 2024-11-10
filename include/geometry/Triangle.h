@@ -38,6 +38,9 @@ class Triangle : public QGraphicsEngineDrawable
     Vertex _a;
     Vertex _b;
     Vertex _c;
+
+    QVector3D
+    computeBarycentricCoordinates(const QVector2D &p, const QVector2D &a, const QVector2D &b, const QVector2D &c);
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_TRIANGLE_H

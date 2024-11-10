@@ -20,12 +20,53 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     QWidget *centralWidget = new QWidget();
     setCentralWidget(centralWidget);
 
+    // Graphics Scene and View Setup
+    QGraphicsScene *scene           = new QGraphicsScene();
+    QGraphicsView *renderEngineView = new QGraphicsView(scene);
+
+    QGraphicsEngine *engine =
+        new QGraphicsEngine(settings.graphicsEngineSettings.sizeX, settings.graphicsEngineSettings.sizeY);
+    scene->addItem(engine);
+
+    QSharedPointer<QGraphicsEngineDrawable> drawable;
+    drawable                                = QSharedPointer<QGraphicsEngineDrawable>(new BezierSurface("crazy.txt"));
+    QSharedPointer<LightSource> lightSource = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 0)));
+    engine->addDrawable(drawable);
+    engine->addLightSource(lightSource);
+    engine->draw();
+
     // Create the left toolbar with a fixed width
     QWidget *leftToolbar = new QWidget();
     leftToolbar->setFixedWidth(350);
 
     QVBoxLayout *leftToolbarLayout = new QVBoxLayout(leftToolbar);
     leftToolbarLayout->setSpacing(10);
+
+    QGroupBox *tesselationBox      = new QGroupBox();
+    QVBoxLayout *tesselationLayout = new QVBoxLayout(tesselationBox);
+    tesselationLayout->setSpacing(5);
+
+    QLabel *tesselationLabel   = new QLabel("Tesselation Level");
+    QSlider *tesselationSlider = new QSlider(Qt::Horizontal);
+    tesselationSlider->setRange(1, 100);
+    tesselationSlider->setValue(10);
+    tesselationSlider->setTickInterval(1);
+    tesselationSlider->setTickPosition(QSlider::TicksBelow);
+    tesselationLayout->addWidget(tesselationLabel);
+    tesselationLayout->addWidget(tesselationSlider);
+    connect(
+        tesselationSlider, &QSlider::valueChanged,
+        [centralWidget](int value)
+        {
+            Settings &settings = Settings::getInstance();
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+            }
+        }
+    );
 
     // Create a group box to contain the sliders and labels
     QGroupBox *rotationBox      = new QGroupBox();
@@ -99,6 +140,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
             }
         }
     );
+    // Add the rotation box to the left toolbar layout
+    leftToolbarLayout->addWidget(rotationBox);
 
     QGroupBox *lightSettingsBox      = new QGroupBox();
     QVBoxLayout *lightSettingsLayout = new QVBoxLayout(lightSettingsBox);
@@ -181,9 +224,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     // Add a vertical spacer to push items to the top
     QSpacerItem *verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-    // Add the rotation box to the left toolbar layout
-    leftToolbarLayout->addWidget(rotationBox);
-
     QGroupBox *bezierSurfaceBox      = new QGroupBox();
     QVBoxLayout *bezierSurfaceLayout = new QVBoxLayout(bezierSurfaceBox);
     bezierSurfaceLayout->setSpacing(5);
@@ -244,21 +284,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     );
 
     leftToolbarLayout->addWidget(bezierSurfaceBox);
-
-    // Graphics Scene and View Setup
-    QGraphicsScene *scene           = new QGraphicsScene();
-    QGraphicsView *renderEngineView = new QGraphicsView(scene);
-
-    QGraphicsEngine *engine =
-        new QGraphicsEngine(settings.graphicsEngineSettings.sizeX, settings.graphicsEngineSettings.sizeY);
-    scene->addItem(engine);
-
-    QSharedPointer<QGraphicsEngineDrawable> drawable =
-        QSharedPointer<QGraphicsEngineDrawable>(new BezierSurface("crazy.txt"));
-    QSharedPointer<LightSource> lightSource = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 0)));
-    engine->addDrawable(drawable);
-    engine->addLightSource(lightSource);
-    engine->draw();
 
     leftToolbarLayout->setAlignment(Qt::AlignTop);
     leftToolbarLayout->addSpacerItem(verticalSpacer);
