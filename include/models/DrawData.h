@@ -7,15 +7,22 @@
 
 #include "graphics/LightSource.h"
 #include <QImage>
+#include <QSharedPointer>
 #include <QVariant>
 
 class DrawData
 {
     public:
+    explicit DrawData(QImage &canvas);
     DrawData(QImage &canvas, const QColor &brushColor);
+    DrawData(QImage &canvas, const QImage &texture);
 
     QImage &canvas;
-    QVariant textureOrBrushColor;
+
+    QColor brushColor;
+    QSharedPointer<QImage> texture;
+    QSharedPointer<QImage> normalMap;
+
     QVector<QVector<float>> zBuffer;
     LightSource *lightSource = nullptr;
 

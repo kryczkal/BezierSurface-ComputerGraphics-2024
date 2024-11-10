@@ -39,8 +39,16 @@ class Triangle : public QGraphicsEngineDrawable
     Vertex _b;
     Vertex _c;
 
-    QVector3D
+    static QVector3D
     computeBarycentricCoordinates(const QVector2D &p, const QVector2D &a, const QVector2D &b, const QVector2D &c);
+
+    void drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, int x, int y);
+
+    void drawPixelDebug(DrawData &drawData, int x, int y);
+
+    void drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, int x, int y, int u, int v);
+
+    void drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, QColor &color, int x, int y);
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_TRIANGLE_H

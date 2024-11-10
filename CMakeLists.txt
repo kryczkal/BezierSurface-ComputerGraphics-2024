@@ -12,13 +12,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# Include basic.txt in the build directory
 file(GLOB TXT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/assets/bezierSurfaces/*.txt")
 foreach(TXT_FILE ${TXT_FILES})
     get_filename_component(TXT_FILE_NAME ${TXT_FILE} NAME)
     configure_file(${TXT_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${TXT_FILE_NAME} COPYONLY)
+endforeach()
+
+file(GLOB TEXTURES "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/*.png")
+foreach(TEXTURE ${TEXTURES})
+    get_filename_component(TEXTURE_NAME ${TEXTURE} NAME)
+    configure_file(${TEXTURE} ${CMAKE_CURRENT_BINARY_DIR}/${TEXTURE_NAME} COPYONLY)
 endforeach()
 
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" include/*.h)
@@ -50,6 +57,7 @@ else()
 endif()
 
 target_link_libraries(BezierSurface-ComputerGraphics-2024 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(BezierSurface-ComputerGraphics-2024 PRIVATE Qt${QT_VERSION_MAJOR}::Concurrent)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

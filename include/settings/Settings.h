@@ -5,6 +5,7 @@
 #ifndef BEZIERSURFACE_COMPUTERGRAPHICS_2024_SETTINGS_H
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_SETTINGS_H
 
+#include "BezierSurfaceSettings.h"
 #include "GraphicsEngineSettings.h"
 #include "LightSettings.h"
 #include "MeshSettings.h"
@@ -26,6 +27,7 @@ class Settings
     GraphicsEngineSettings graphicsEngineSettings;
     VertexSettings vertexSettings;
     LightSettings lightSettings;
+    BezierSurfaceSettings bezierSurfaceSettings;
 
     private:
     Settings()                       = default;

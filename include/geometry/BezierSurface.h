@@ -12,17 +12,27 @@
 class BezierSurface : public Mesh
 {
     public:
+    // Constructors
     explicit BezierSurface(const QString &filename, int tessellationLevel = -1);
 
+    // Getters
     [[maybe_unused]] [[nodiscard]] QVector<QVector3D> getControlPoints() const;
 
+    // Public Methods
+    void draw(DrawData &drawData) override;
+    void transform(QMatrix4x4 &matrix) override;
+
+    void setTessellationLevel(int tessellationLevel);
+
     private:
-    QVector<QVector3D> _controlPoints;
+    QVector<QVector3D> _controlPointsNormal;
+    QVector<QVector3D> _controlPointsTransformed;
 
     void readControlPoints(const QString &filename);
     void map3dBezierFrom2dMesh();
 
     void evaluateBezierSurface(Vertex &vertex) const;
+    void drawControlPointsAndGrid(DrawData &drawData);
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_BEZIERSURFACE_H

@@ -2,11 +2,14 @@
 #include "geometry/BezierSurface.h"
 #include "graphics/QGraphicsEngine.h"
 #include <QCheckBox>
+#include <QColorDialog>
+#include <QFileDialog>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGroupBox>
 #include <QLabel>
+#include <QPushButton>
 #include <QSlider>
 #include <QSpacerItem>
 #include <QSplitter>
@@ -28,12 +31,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         new QGraphicsEngine(settings.graphicsEngineSettings.sizeX, settings.graphicsEngineSettings.sizeY);
     scene->addItem(engine);
 
-    QSharedPointer<QGraphicsEngineDrawable> drawable;
-    drawable                                = QSharedPointer<QGraphicsEngineDrawable>(new BezierSurface("crazy.txt"));
-    QSharedPointer<LightSource> lightSource = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 0)));
+    QSharedPointer<BezierSurface> bezierSurface      = QSharedPointer<BezierSurface>(new BezierSurface("crazy.txt"));
+    QSharedPointer<QGraphicsEngineDrawable> drawable = QSharedPointer<QGraphicsEngineDrawable>(bezierSurface);
+
+    QSharedPointer<LightSource> lightSource = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 3)));
     engine->addDrawable(drawable);
     engine->addLightSource(lightSource);
     engine->draw();
+
+    QSharedPointer<QImage> texture   = QSharedPointer<QImage>(new QImage("testTexture1.png"));
+    QSharedPointer<QImage> normalMap = nullptr;
+
+    bezierSurface->setTexture(texture);
+    bezierSurface->setNormalMap(normalMap);
+
+    // Validate if the texture was loaded correctly
+    if (texture->isNull())
+    {
+        qDebug() << "Texture not loaded correctly";
+    }
 
     // Create the left toolbar with a fixed width
     QWidget *leftToolbar = new QWidget();
@@ -228,7 +244,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     QVBoxLayout *bezierSurfaceLayout = new QVBoxLayout(bezierSurfaceBox);
     bezierSurfaceLayout->setSpacing(5);
 
-    QCheckBox *bezierSurfaceCheckbox = new QCheckBox("Draw Triangles - Debug");
+    QCheckBox *bezierSurfaceCheckbox = new QCheckBox("Draw Triangles - (Enable Debug Mode)");
     bezierSurfaceCheckbox->setChecked(settings.triangleSettings.debugDraw);
     bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox);
     connect(
@@ -246,7 +262,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
             }
         }
     );
-    QCheckBox *bezierSurfaceCheckbox2 = new QCheckBox("Draw Normals");
+    QCheckBox *bezierSurfaceCheckbox2 = new QCheckBox("Draw Normals - (In Debug Mode)");
     bezierSurfaceCheckbox2->setChecked(settings.vertexSettings.drawNormals);
     bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox2);
     connect(
@@ -264,7 +280,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
             }
         }
     );
-    QCheckBox *bezierSurfaceCheckbox3 = new QCheckBox("Draw Tangents");
+    QCheckBox *bezierSurfaceCheckbox3 = new QCheckBox("Draw Tangents - (In Debug Mode)");
     bezierSurfaceCheckbox3->setChecked(settings.vertexSettings.drawTangents);
     bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox3);
     connect(
@@ -283,8 +299,197 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
         }
     );
 
+    QCheckBox *bezierSurfaceCheckbox4 = new QCheckBox("Draw Control Points");
+    bezierSurfaceCheckbox4->setChecked(settings.bezierSurfaceSettings.showControlPoints);
+    bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox4);
+    connect(
+        bezierSurfaceCheckbox4, &QCheckBox::stateChanged,
+        [centralWidget](int state)
+        {
+            Settings &settings                               = Settings::getInstance();
+            settings.bezierSurfaceSettings.showControlPoints = state == Qt::Checked;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
+    QCheckBox *bezierSurfaceCheckbox5 = new QCheckBox("Enable Lighting");
+    bezierSurfaceCheckbox5->setChecked(settings.lightSettings.isLightSourceEnabled);
+    bezierSurfaceLayout->addWidget(bezierSurfaceCheckbox5);
+    connect(
+        bezierSurfaceCheckbox5, &QCheckBox::stateChanged,
+        [centralWidget](int state)
+        {
+            Settings &settings                          = Settings::getInstance();
+            settings.lightSettings.isLightSourceEnabled = state == Qt::Checked;
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
     leftToolbarLayout->addWidget(bezierSurfaceBox);
 
+    // Normal Map and Texture Settings
+    QGroupBox *normalMapBox      = new QGroupBox();
+    QVBoxLayout *normalMapLayout = new QVBoxLayout(normalMapBox);
+    normalMapLayout->setSpacing(5);
+
+    // Set tessellation level
+    QLabel *tessellationLabel   = new QLabel("Tessellation Level");
+    QSlider *tessellationSlider = new QSlider(Qt::Horizontal);
+    tessellationSlider->setRange(1, 100);
+    tessellationSlider->setValue(10);
+    tessellationSlider->setTickInterval(10);
+    tessellationSlider->setTickPosition(QSlider::TicksBelow);
+    normalMapLayout->addWidget(tessellationLabel);
+    normalMapLayout->addWidget(tessellationSlider);
+    connect(
+        tessellationSlider, &QSlider::valueChanged,
+        [=](int value)
+        {
+            float rotationX, rotationY, rotationZ;
+            rotationX = xRotationSlider->value();
+            rotationY = yRotationSlider->value();
+            rotationZ = zRotationSlider->value();
+            bezierSurface->setTessellationLevel(value);
+            engine->setRotation(rotationX, rotationY, rotationZ);
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
+    // Pick Normal Map Button
+    QPushButton *pickNormalMapButton = new QPushButton("Pick Normal Map");
+    normalMapLayout->addWidget(pickNormalMapButton);
+    connect(
+        pickNormalMapButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            QString path = QFileDialog::getOpenFileName(
+                centralWidget, "Open Normal Map", QDir::homePath(), "Images (*.png *.jpg)"
+            );
+            if (!path.isEmpty())
+            {
+                Settings &settings = Settings::getInstance();
+                bezierSurface->setNormalMap(QSharedPointer<QImage>(new QImage(path)));
+
+                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+                if (engine)
+                {
+                    engine->draw();
+                }
+            }
+        }
+    );
+    // Pick Texture Button
+    QPushButton *pickTextureButton = new QPushButton("Pick Texture");
+    normalMapLayout->addWidget(pickTextureButton);
+    connect(
+        pickTextureButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            QString path =
+                QFileDialog::getOpenFileName(centralWidget, "Open Texture", QDir::homePath(), "Images (*.png *.jpg)");
+            if (!path.isEmpty())
+            {
+                Settings &settings = Settings::getInstance();
+                bezierSurface->setTexture(QSharedPointer<QImage>(new QImage(path)));
+
+                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+                if (engine)
+                {
+                    engine->draw();
+                }
+            }
+        }
+    );
+
+    // Clear Texture Button
+    QPushButton *clearTextureButton = new QPushButton("Clear Texture");
+    normalMapLayout->addWidget(clearTextureButton);
+    connect(
+        clearTextureButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            Settings &settings = Settings::getInstance();
+            bezierSurface->setTexture(nullptr);
+
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine)
+            {
+                engine->draw();
+            }
+        }
+    );
+
+    // Pick Bezier Surface Color
+    QPushButton *pickBezierSurfaceColorButton = new QPushButton("Pick Bezier Surface Color");
+    normalMapLayout->addWidget(pickBezierSurfaceColorButton);
+    connect(
+        pickBezierSurfaceColorButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            QColor color = QColorDialog::getColor(Qt::white, centralWidget);
+            if (color.isValid())
+            {
+                Settings &settings                          = Settings::getInstance();
+                settings.bezierSurfaceSettings.defaultColor = color;
+
+                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+                if (engine)
+                {
+                    engine->draw();
+                }
+            }
+        }
+    );
+
+    // Pick light source color
+    QPushButton *pickLightSourceColorButton = new QPushButton("Pick Light Source Color");
+    normalMapLayout->addWidget(pickLightSourceColorButton);
+    connect(
+        pickLightSourceColorButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            QColor color = QColorDialog::getColor(Qt::white, centralWidget);
+            if (color.isValid())
+            {
+                Settings &settings                            = Settings::getInstance();
+                settings.lightSettings.lightSourceObjectColor = color;
+                lightSource->setColor(color);
+
+                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+                if (engine)
+                {
+                    engine->draw();
+                }
+            }
+        }
+    );
+
+    leftToolbarLayout->addWidget(normalMapBox);
+
+    // Add a vertical spacer to push items to the top
     leftToolbarLayout->setAlignment(Qt::AlignTop);
     leftToolbarLayout->addSpacerItem(verticalSpacer);
 
@@ -298,6 +503,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     mainLayout->addWidget(mainSplitter);
 
     renderEngineView->fitInView(engine->boundingRect(), Qt::KeepAspectRatio);
+
+    QTimer *timer = new QTimer(this);
+    connect(
+        timer, &QTimer::timeout,
+        [engine]()
+        {
+            engine->autoMoveLightSources();
+            engine->draw();
+        }
+    );
+    timer->start(1000 / 60);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

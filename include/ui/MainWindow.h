@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "geometry/BezierSurface.h"
 #include <QMainWindow>
 
 class MainWindow : public QMainWindow

@@ -6,6 +6,7 @@
 #include "models/DrawData.h"
 #include "settings/Settings.h"
 #include "utils/DrawUtils.h"
+#include <QMatrix4x4>
 
 LightSource::LightSource(QVector3D position) : position(position) {}
 

@@ -44,6 +44,8 @@ QVector<Triangle> Mesh::create2dTessellationTriangles(const int tessellationLeve
 
 void Mesh::draw(DrawData &drawData)
 {
+    drawData.texture   = _texture;
+    drawData.normalMap = _normalMap;
     for (auto &triangle : _triangles)
     {
         triangle.draw(drawData);

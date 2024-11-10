@@ -73,7 +73,7 @@ void QGraphicsEngine::clearDrawables() { _drawables.clear(); }
 void QGraphicsEngine::draw()
 {
     _qImage.fill(Settings::getInstance().graphicsEngineSettings.backgroundColor);
-    DrawData drawData(_qImage, Qt::darkRed);
+    DrawData drawData(_qImage);
     drawData.lightSource = _lightSources.size() > 0 ? _lightSources[0].data() : nullptr;
 
     //    QMutexLocker locker(&_drawMutex);
@@ -140,9 +140,21 @@ void QGraphicsEngine::clearLightSources()
 
 void QGraphicsEngine::autoMoveLightSources()
 {
+    Settings &settings = Settings::getInstance();
     for (auto &lightSource : _lightSources)
     {
         QVector3D &position = lightSource->getPosition();
-        VectorMovementUtils::moveAcrossCircle(position, QVector3D(0.5f, 0.5f, -3), 0.5f, 0.01f);
+        VectorMovementUtils::moveAcrossCircle(
+            position, settings.lightSettings.orbitCenter, settings.lightSettings.orbitRadius,
+            settings.lightSettings.orbitSpeed
+        );
     }
+}
+
+void QGraphicsEngine::setRotation(float x, float y, float z)
+{
+    _rotationX = x;
+    _rotationY = y;
+    _rotationZ = z;
+    rotate(_rotationX, _rotationY, _rotationZ);
 }

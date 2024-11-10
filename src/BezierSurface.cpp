@@ -3,6 +3,7 @@
 //
 
 #include "geometry/BezierSurface.h"
+#include "utils/DrawUtils.h"
 #include <QDebug>
 #include <QFile>
 
@@ -13,13 +14,13 @@ BezierSurface::BezierSurface(const QString &filename, int tessellationLevel) : M
         tessellationLevel = Settings::getInstance().meshSettings.tessellationLevel;
     }
     Q_ASSERT(tessellationLevel >= 0);
-
     readControlPoints(filename);
+
     _triangles = create2dTessellationTriangles(tessellationLevel);
     map3dBezierFrom2dMesh();
 }
 
-[[maybe_unused]] QVector<QVector3D> BezierSurface::getControlPoints() const { return _controlPoints; }
+[[maybe_unused]] QVector<QVector3D> BezierSurface::getControlPoints() const { return _controlPointsNormal; }
 
 void BezierSurface::readControlPoints(const QString &filename)
 {
@@ -58,13 +59,14 @@ void BezierSurface::readControlPoints(const QString &filename)
             return;
         }
 
-        _controlPoints.push_back(QVector3D(x, y, z));
+        _controlPointsNormal.push_back(QVector3D(x, y, z));
 
         qDebug() << "Read control points:" << QString("%1 %2 %3").arg(x, 0, 'f', 2).arg(y, 0, 'f', 2).arg(z, 0, 'f', 2);
     }
     file.close();
 
-    qDebug() << "Read" << _controlPoints.size() << "control points";
+    qDebug() << "Read" << _controlPointsNormal.size() << "control points";
+    _controlPointsTransformed = _controlPointsNormal;
 }
 
 void BezierSurface::map3dBezierFrom2dMesh()
@@ -153,7 +155,7 @@ void BezierSurface::evaluateBezierSurface(Vertex &vertex) const
     {
         for (int j = 0; j < 4; ++j)
         {
-            QVector3D controlPoint = _controlPoints[i * 4 + j];
+            QVector3D controlPoint = _controlPointsNormal[i * 4 + j];
             position += Bu[i] * Bv[j] * controlPoint;
             uTangent += dBu[i] * Bv[j] * controlPoint;
             vTangent += Bu[i] * dBv[j] * controlPoint;
@@ -166,4 +168,61 @@ void BezierSurface::evaluateBezierSurface(Vertex &vertex) const
     vertex.setUTangentOriginal(uTangent);
     vertex.setVTangentOriginal(vTangent);
     vertex.setNormalOriginal(normal);
+}
+
+void BezierSurface::draw(DrawData &drawData)
+{
+    Settings &settings = Settings::getInstance();
+    if (!drawData.texture)
+        drawData.setBrushColor(settings.bezierSurfaceSettings.defaultColor);
+    if (Settings::getInstance().bezierSurfaceSettings.showControlPoints)
+        drawControlPointsAndGrid(drawData);
+    Mesh::draw(drawData);
+}
+
+void BezierSurface::drawControlPointsAndGrid(DrawData &drawData)
+{
+    int gridSize = std::sqrt(_controlPointsTransformed.size());
+
+    for (int i = 0; i < gridSize; ++i)
+    {
+        for (int j = 0; j < gridSize; ++j)
+        {
+            int index       = i * gridSize + j;
+            QVector3D point = _controlPointsTransformed[index];
+
+            DrawUtils::drawPoint(drawData, point, Qt::black, 5, 5);
+
+            if (j < gridSize - 1)
+            {
+                QVector3D rightNeighbor = _controlPointsTransformed[i * gridSize + (j + 1)];
+                DrawUtils::drawLine(drawData, point, rightNeighbor, Qt::blue, 1.0f);
+            }
+
+            if (i < gridSize - 1)
+            {
+                QVector3D belowNeighbor = _controlPointsTransformed[(i + 1) * gridSize + j];
+                DrawUtils::drawLine(drawData, point, belowNeighbor, Qt::blue, 1.0f);
+            }
+        }
+    }
+}
+
+void BezierSurface::transform(QMatrix4x4 &matrix)
+{
+    Mesh::transform(matrix);
+    for (int i = 0; i < _controlPointsNormal.size(); ++i)
+    {
+        _controlPointsTransformed[i] = _modelMatrix * _controlPointsNormal[i];
+    }
+}
+
+void BezierSurface::setTessellationLevel(int tessellationLevel)
+{
+    _triangles = create2dTessellationTriangles(tessellationLevel);
+    map3dBezierFrom2dMesh();
+    for (int i = 0; i < _controlPointsNormal.size(); ++i)
+    {
+        _controlPointsTransformed[i] = _modelMatrix * _controlPointsNormal[i];
+    }
 }

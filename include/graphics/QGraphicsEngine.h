@@ -25,6 +25,7 @@ class QGraphicsEngine : public QGraphicsItem
     void setRotationX(float rotationX);
     void setRotationY(float rotationY);
     void setRotationZ(float rotationZ);
+    void setRotation(float x, float y, float z);
 
     // Inheritance Methods
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

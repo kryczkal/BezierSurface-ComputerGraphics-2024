@@ -4,6 +4,22 @@
 
 #include "models/DrawData.h"
 
+DrawData::DrawData(QImage &canvas) : canvas(canvas)
+{
+    setBrushColor(Qt::magenta);
+    X       = canvas.width();
+    Y       = canvas.height();
+    zBuffer = QVector<QVector<float>>(X, QVector<float>(Y, -std::numeric_limits<float>::infinity()));
+}
+
+DrawData::DrawData(QImage &canvas, const QImage &texture) : canvas(canvas)
+{
+    setTexture(texture);
+    X       = canvas.width();
+    Y       = canvas.height();
+    zBuffer = QVector<QVector<float>>(X, QVector<float>(Y, -std::numeric_limits<float>::infinity()));
+}
+
 DrawData::DrawData(QImage &canvas, const QColor &brushColor) : canvas(canvas)
 {
     setBrushColor(brushColor);
@@ -35,6 +51,10 @@ void DrawData::clearZBuffer()
     }
 }
 
-void DrawData::setBrushColor(const QColor &color) { textureOrBrushColor = QVariant::fromValue(color); }
+void DrawData::setBrushColor(const QColor &color)
+{
+    brushColor = color;
+    texture    = nullptr;
+}
 
-void DrawData::setTexture(const QImage &texture) { textureOrBrushColor = QVariant::fromValue(texture); }
+void DrawData::setTexture(const QImage &texture) { this->texture = QSharedPointer<QImage>::create(texture); }
