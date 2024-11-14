@@ -6,11 +6,22 @@
 #include "geometry/Triangle.h"
 #include "models/DrawData.h"
 #include <QMatrix4x4>
+#include <QtConcurrent>
+#include <algorithm>
 #include <cmath>
+#include <qtconcurrentmap.h>
 
-[[maybe_unused]] Mesh::Mesh(const QVector<Triangle> &triangles) { _triangles = triangles; }
+[[maybe_unused]] Mesh::Mesh(const QVector<Triangle> &triangles)
+{
+    _triangles = triangles;
+    sortTrianglesByDepth();
+}
 
-[[maybe_unused]] Mesh::Mesh(QVector<Triangle> &&triangles) { _triangles = qMove(triangles); }
+[[maybe_unused]] Mesh::Mesh(QVector<Triangle> &&triangles)
+{
+    _triangles = qMove(triangles);
+    sortTrianglesByDepth();
+}
 
 [[maybe_unused]] QVector<Triangle> Mesh::getTriangles() const { return _triangles; }
 
@@ -44,16 +55,22 @@ QVector<Triangle> Mesh::create2dTessellationTriangles(const int tessellationLeve
 
 void Mesh::draw(DrawData &drawData)
 {
+    QMutexLocker locker(&_mutex);
     drawData.texture   = _texture;
     drawData.normalMap = _normalMap;
-    for (auto &triangle : _triangles)
-    {
-        triangle.draw(drawData);
-    }
+
+    QtConcurrent::blockingMap(
+        _triangles,
+        [&drawData](Triangle &triangle)
+        {
+            triangle.draw(drawData);
+        }
+    );
 }
 
 void Mesh::transform(QMatrix4x4 &matrix)
 {
+    QMutexLocker locker(&_mutex);
     QMatrix4x4 translateToOrigin;
     translateToOrigin.translate(-_position);
 
@@ -62,8 +79,32 @@ void Mesh::transform(QMatrix4x4 &matrix)
 
     _modelMatrix = translateBack * matrix * translateToOrigin;
 
-    for (auto &triangle : _triangles)
-    {
-        triangle.transform(_modelMatrix);
-    }
+    QtConcurrent::blockingMap(
+        _triangles,
+        [&](Triangle &triangle)
+        {
+            triangle.transform(_modelMatrix);
+        }
+    );
+
+    sortTrianglesByDepth();
+}
+
+void Mesh::sortTrianglesByDepth()
+{
+    std::sort(
+        _triangles.begin(), _triangles.end(),
+        [](const Triangle &a, const Triangle &b)
+        {
+            float aDepth = std::max(
+                {a.getA().getPositionTransformed().z(), a.getB().getPositionTransformed().z(),
+                 a.getC().getPositionTransformed().z()}
+            );
+            float bDepth = std::max(
+                {b.getA().getPositionTransformed().z(), b.getB().getPositionTransformed().z(),
+                 b.getC().getPositionTransformed().z()}
+            );
+            return aDepth > bDepth;
+        }
+    );
 }

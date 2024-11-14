@@ -6,6 +6,7 @@
 #define BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINEDRAWABLE_H
 
 #include <QImage>
+#include <qmutex.h>
 class DrawData;
 
 class QGraphicsEngineDrawable

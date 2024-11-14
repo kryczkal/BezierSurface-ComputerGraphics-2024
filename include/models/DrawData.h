@@ -9,6 +9,7 @@
 #include <QImage>
 #include <QSharedPointer>
 #include <QVariant>
+#include <qmutex.h>
 
 class DrawData
 {
@@ -23,6 +24,7 @@ class DrawData
     QSharedPointer<QImage> texture;
     QSharedPointer<QImage> normalMap;
 
+    QMutex zBufferMutex;
     QVector<QVector<float>> zBuffer;
     LightSource *lightSource = nullptr;
 

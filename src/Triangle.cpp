@@ -6,6 +6,7 @@
 #include "geometry/Vertex.h"
 #include "models/DrawData.h"
 #include "settings/Settings.h"
+#include "utils/DrawUtils.h"
 #include <QColor>
 #include <QDebug>
 #include <QMatrix4x4>
@@ -40,6 +41,8 @@ void Triangle::draw(DrawData &drawData)
         QVector3D pos;
         QVector3D normal;
         float u, v;
+        QVector3D uTangent;
+        QVector3D vTangent;
     };
 
     struct Edge
@@ -74,9 +77,15 @@ void Triangle::draw(DrawData &drawData)
     float y2 = posC.y() * height;
     float z2 = posC.z();
 
-    Vertex v0 = {x0, y0, z0, posA, normalA, _a.getU(), _a.getV()};
-    Vertex v1 = {x1, y1, z1, posB, normalB, _b.getU(), _b.getV()};
-    Vertex v2 = {x2, y2, z2, posC, normalC, _c.getU(), _c.getV()};
+    Vertex v0 = {
+        x0, y0, z0, posA, normalA, _a.getU(), _a.getV(), _a.getUTangentTransformed(), _a.getVTangentTransformed()
+    };
+    Vertex v1 = {
+        x1, y1, z1, posB, normalB, _b.getU(), _b.getV(), _b.getUTangentTransformed(), _b.getVTangentTransformed()
+    };
+    Vertex v2 = {
+        x2, y2, z2, posC, normalC, _c.getU(), _c.getV(), _c.getUTangentTransformed(), _c.getVTangentTransformed()
+    };
 
     std::array<Vertex, 3> vertices = {v0, v1, v2};
     std::sort(
@@ -163,7 +172,7 @@ void Triangle::draw(DrawData &drawData)
             int xStart = static_cast<int>(std::ceil(activeEdgeTable[i].x));
             int xEnd   = static_cast<int>(std::floor(activeEdgeTable[i + 1].x));
 
-            xStart = std::max(xStart, 0);
+            xStart = std::max(xStart - 1, 0);
             xEnd   = std::min(xEnd, width - 1);
 
             for (int x = xStart; x <= xEnd; ++x)
@@ -179,9 +188,11 @@ void Triangle::draw(DrawData &drawData)
                 float z =
                     barycentric.x() * vertices[0].z + barycentric.y() * vertices[1].z + barycentric.z() * vertices[2].z;
 
+                QMutexLocker locker(&drawData.zBufferMutex);
                 if (z < drawData.zBuffer[x][y])
                     continue;
                 drawData.zBuffer[x][y] = z;
+                locker.unlock();
 
                 QVector3D pos = barycentric.x() * vertices[0].pos + barycentric.y() * vertices[1].pos +
                                 barycentric.z() * vertices[2].pos;
@@ -199,22 +210,30 @@ void Triangle::draw(DrawData &drawData)
 
                 if (drawData.normalMap)
                 {
-
-                    uX                 = static_cast<int>(u * drawData.normalMap->width());
-                    vY                 = static_cast<int>(v * drawData.normalMap->height());
-                    QColor normalColor = drawData.normalMap->pixelColor(uX, vY);
-                    normal             = -QVector3D(
-                                  normalColor.redF() * 2.0f - 1.0f, normalColor.greenF() * 2.0f - 1.0f,
-                                  normalColor.blueF() * 2.0f - 1.0f
+                    uX = qBound(0, static_cast<int>(u * drawData.normalMap->width()), drawData.normalMap->width() - 1);
+                    vY =
+                        qBound(0, static_cast<int>(v * drawData.normalMap->height()), drawData.normalMap->height() - 1);
+                    QColor normalColor      = drawData.normalMap->pixelColor(uX, vY);
+                    QVector3D textureVector = QVector3D(
+                                                  normalColor.redF() * 2.0f - 1.0f, normalColor.greenF() * 2.0f - 1.0f,
+                                                  normalColor.blueF() * 2.0f - 1.0f
                     )
-                                  .normalized();
+                                                  .normalized();
+                    // M3x3 = [Pu, Pv, N] but in QMatrix4x4
+                    QMatrix4x4 M3x3;
+                    M3x3.setColumn(0, vertices[0].uTangent);
+                    M3x3.setColumn(1, vertices[0].vTangent);
+                    M3x3.setColumn(2, vertices[0].normal);
+                    QVector3D normalMapNormal = M3x3 * textureVector;
+                    normalMapNormal.normalize();
+                    normal = normalMapNormal;
                 }
 
                 QColor color;
                 if (drawData.texture)
                 {
-                    uX    = static_cast<int>(u * drawData.texture->width());
-                    vY    = static_cast<int>(v * drawData.texture->height());
+                    uX    = qBound(0, static_cast<int>(u * drawData.texture->width()), drawData.texture->width() - 1);
+                    vY    = qBound(0, static_cast<int>(v * drawData.texture->height()), drawData.texture->height() - 1);
                     color = drawData.texture->pixelColor(uX, vY);
                 }
                 else

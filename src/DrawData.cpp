@@ -30,18 +30,21 @@ DrawData::DrawData(QImage &canvas, const QColor &brushColor) : canvas(canvas)
 
 void DrawData::clear(const QColor &color)
 {
+    QMutexLocker locker(&zBufferMutex);
     canvas.fill(color);
     clearZBuffer();
 }
 
 void DrawData::clear()
 {
+    QMutexLocker locker(&zBufferMutex);
     canvas.fill(Qt::white);
     clearZBuffer();
 }
 
 void DrawData::clearZBuffer()
 {
+    QMutexLocker locker(&zBufferMutex);
     for (int i = 0; i < X; i++)
     {
         for (int j = 0; j < Y; j++)

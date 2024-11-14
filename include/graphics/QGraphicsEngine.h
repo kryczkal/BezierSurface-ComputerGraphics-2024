@@ -27,6 +27,9 @@ class QGraphicsEngine : public QGraphicsItem
     void setRotationZ(float rotationZ);
     void setRotation(float x, float y, float z);
 
+    QSharedPointer<QTimer> getAnimationTimer() const { return _animationTimer; }
+    void setAnimationTimer(QSharedPointer<QTimer> animationTimer) { _animationTimer = animationTimer; }
+
     // Inheritance Methods
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
@@ -39,6 +42,8 @@ class QGraphicsEngine : public QGraphicsItem
     void addLightSource(QSharedPointer<LightSource> lightSource);
     void clearLightSources();
     void autoMoveLightSources();
+    // Animation
+    void setupAnimationTimer();
 
     // Test Methods
     void testPixmap();
@@ -58,6 +63,7 @@ class QGraphicsEngine : public QGraphicsItem
     QMutex _drawMutex;
     QVector<QSharedPointer<QGraphicsEngineDrawable>> _drawables;
     QVector<QSharedPointer<LightSource>> _lightSources;
+    QSharedPointer<QTimer> _animationTimer;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_QGRAPHICSENGINE_H

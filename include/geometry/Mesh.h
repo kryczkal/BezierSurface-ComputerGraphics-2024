@@ -23,10 +23,18 @@ class Mesh : public QGraphicsEngineDrawable
     [[maybe_unused]] [[nodiscard]] QVector<Triangle> getTriangles() const;
 
     QSharedPointer<QImage> getTexture() const { return _texture; }
-    void setTexture(QSharedPointer<QImage> texture) { _texture = texture; }
+    void setTexture(QSharedPointer<QImage> texture)
+    {
+        QMutexLocker locker(&_mutex);
+        _texture = texture;
+    }
 
     QSharedPointer<QImage> getNormalMap() const { return _normalMap; }
-    void setNormalMap(QSharedPointer<QImage> normalMap) { _normalMap = normalMap; }
+    void setNormalMap(QSharedPointer<QImage> normalMap)
+    {
+        QMutexLocker locker(&_mutex);
+        _normalMap = normalMap;
+    }
 
     // Tessellation
     [[maybe_unused]] static Mesh create2dTessellation(int tessellationLevel);
@@ -36,9 +44,14 @@ class Mesh : public QGraphicsEngineDrawable
     void draw(DrawData &drawData) override;
     void transform(QMatrix4x4 &matrix) override;
 
-    [[maybe_unused]] void loadTexture(const QString &path) { setTexture(QSharedPointer<QImage>::create(QImage(path))); }
+    [[maybe_unused]] void loadTexture(const QString &path)
+    {
+        QMutexLocker locker(&_mutex);
+        setTexture(QSharedPointer<QImage>::create(QImage(path)));
+    }
     [[maybe_unused]] void loadNormalMap(const QString &path)
     {
+        QMutexLocker locker(&_mutex);
         setNormalMap(QSharedPointer<QImage>::create(QImage(path)));
     }
 
@@ -48,6 +61,9 @@ class Mesh : public QGraphicsEngineDrawable
     QVector<Triangle> _triangles;
     QSharedPointer<QImage> _texture;
     QSharedPointer<QImage> _normalMap;
+    QMutex _mutex;
+
+    void sortTrianglesByDepth();
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESH_H

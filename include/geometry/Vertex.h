@@ -27,6 +27,11 @@ class Vertex : public QGraphicsEngineDrawable
     [[maybe_unused]] [[nodiscard]] QVector3D &getUTangentOriginal() { return _uTangentOriginal; }
     [[maybe_unused]] [[nodiscard]] QVector3D &getVTangentOriginal() { return _vTangentOriginal; }
 
+    [[maybe_unused]] [[nodiscard]] const QVector3D &getPositionOriginal() const { return _positionOriginal; }
+    [[maybe_unused]] [[nodiscard]] const QVector3D &getNormalOriginal() const { return _normalOriginal; }
+    [[maybe_unused]] [[nodiscard]] const QVector3D &getUTangentOriginal() const { return _uTangentOriginal; }
+    [[maybe_unused]] [[nodiscard]] const QVector3D &getVTangentOriginal() const { return _vTangentOriginal; }
+
     [[maybe_unused]] [[nodiscard]] QVector3D &getPositionTransformed() { return _positionTransformed; }
     [[maybe_unused]] [[nodiscard]] QVector3D &getNormalTransformed() { return _normalTransformed; }
     [[maybe_unused]] [[nodiscard]] QVector3D &getUTangentTransformed() { return _uTangentTransformed; }

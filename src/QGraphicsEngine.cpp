@@ -3,6 +3,7 @@
 //
 #include "graphics/QGraphicsEngine.h"
 #include "models/DrawData.h"
+#include "qobject.h"
 #include "settings/Settings.h"
 #include "utils/VectorMovementUtils.h"
 #include <QColor>
@@ -157,4 +158,28 @@ void QGraphicsEngine::setRotation(float x, float y, float z)
     _rotationY = y;
     _rotationZ = z;
     rotate(_rotationX, _rotationY, _rotationZ);
+}
+
+void QGraphicsEngine::setupAnimationTimer()
+{
+    if (!_animationTimer)
+    {
+        _animationTimer = QSharedPointer<QTimer>::create();
+    }
+
+    if (_animationTimer->isActive())
+    {
+        _animationTimer->stop();
+        _animationTimer->disconnect();
+    }
+
+    QObject::connect(
+        _animationTimer.data(), &QTimer::timeout,
+        [this]()
+        {
+            this->autoMoveLightSources();
+            this->draw();
+        }
+    );
+    _animationTimer->start(1000 / 60);
 }

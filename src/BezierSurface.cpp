@@ -219,6 +219,7 @@ void BezierSurface::transform(QMatrix4x4 &matrix)
 
 void BezierSurface::setTessellationLevel(int tessellationLevel)
 {
+    QMutexLocker locker(&_mutex);
     _triangles = create2dTessellationTriangles(tessellationLevel);
     map3dBezierFrom2dMesh();
     for (int i = 0; i < _controlPointsNormal.size(); ++i)

@@ -22,10 +22,16 @@ foreach(TXT_FILE ${TXT_FILES})
     configure_file(${TXT_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${TXT_FILE_NAME} COPYONLY)
 endforeach()
 
-file(GLOB TEXTURES "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/*.png")
+file(GLOB TEXTURES "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/*.png", "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/*.jpg")
 foreach(TEXTURE ${TEXTURES})
     get_filename_component(TEXTURE_NAME ${TEXTURE} NAME)
-    configure_file(${TEXTURE} ${CMAKE_CURRENT_BINARY_DIR}/${TEXTURE_NAME} COPYONLY)
+    configure_file(${TEXTURE} ${CMAKE_CURRENT_BINARY_DIR}/textures/${TEXTURE_NAME} COPYONLY)
+endforeach()
+
+file(GLOB NORMALMAPS "${CMAKE_CURRENT_SOURCE_DIR}/assets/normalMaps/*.png", "${CMAKE_CURRENT_SOURCE_DIR}/assets/normalMaps/*.jpg")
+foreach(NORMALMAP ${NORMALMAPS})
+    get_filename_component(NORMALMAP_NAME ${NORMALMAP} NAME)
+    configure_file(${NORMALMAP} ${CMAKE_CURRENT_BINARY_DIR}/normalMaps/${NORMALMAP_NAME} COPYONLY)
 endforeach()
 
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp" include/*.h)
