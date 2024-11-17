@@ -44,6 +44,9 @@ class QGraphicsEngine : public QGraphicsItem
     void autoMoveLightSources();
     // Animation
     void setupAnimationTimer();
+    void startAnimation();
+    void stopAnimation();
+    void toggleAnimation();
 
     // Test Methods
     void testPixmap();

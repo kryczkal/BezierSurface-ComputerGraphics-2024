@@ -189,3 +189,34 @@ void QGraphicsEngine::setupAnimationTimer()
     );
     _animationTimer->start(1000 / 60);
 }
+
+void QGraphicsEngine::stopAnimation()
+{
+    if (_animationTimer && _animationTimer->isActive())
+    {
+        _animationTimer->stop();
+    }
+}
+
+void QGraphicsEngine::startAnimation()
+{
+    if (_animationTimer && !_animationTimer->isActive())
+    {
+        _animationTimer->start(1000 / 60);
+    }
+}
+
+void QGraphicsEngine::toggleAnimation()
+{
+    if (_animationTimer)
+    {
+        if (_animationTimer->isActive())
+        {
+            stopAnimation();
+        }
+        else
+        {
+            startAnimation();
+        }
+    }
+}

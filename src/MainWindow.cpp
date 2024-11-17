@@ -191,6 +191,21 @@ void MainWindow::setupMiscBox(
         }
     );
 
+    // Toggle Animation Button
+    QPushButton *toggleAnimationButton = new QPushButton("Toggle Animation");
+    normalMapLayout->addWidget(toggleAnimationButton);
+    connect(
+        toggleAnimationButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            engine->toggleAnimation();
+        }
+    );
+
+    QLabel *animationStoppedLabel = new QLabel("If animation is stopped, sliders are inactivated");
+    animationStoppedLabel->setAlignment(Qt::AlignCenter);
+    normalMapLayout->addWidget(animationStoppedLabel);
+
     leftToolbarLayout->addWidget(normalMapBox);
 }
 
