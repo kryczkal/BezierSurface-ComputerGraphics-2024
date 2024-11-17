@@ -13,7 +13,7 @@ class LightSource : public QGraphicsEngineDrawable
 {
     public:
     // Constructors
-    LightSource(QVector3D position = QVector3D(0, 0, 0));
+    LightSource(QColor color = QColor(255, 255, 255)) : color(color) {};
 
     // Getters and setters
     QVector3D &getPosition() { return position; }
@@ -31,7 +31,7 @@ class LightSource : public QGraphicsEngineDrawable
 
     private:
     QVector3D position;
-    QColor color = QColor(155, 155, 0);
+    QColor color;
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_LIGHTSOURCE_H

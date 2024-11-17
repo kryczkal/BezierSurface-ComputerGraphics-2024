@@ -178,14 +178,21 @@ void Triangle::draw(DrawData &drawData)
                 QVector3D normal = (barycentric.x() * vertices[0].normal + barycentric.y() * vertices[1].normal +
                                     barycentric.z() * vertices[2].normal)
                                        .normalized();
-
                 const float u =
                     barycentric.x() * vertices[0].u + barycentric.y() * vertices[1].u + barycentric.z() * vertices[2].u;
                 const float v =
                     barycentric.x() * vertices[0].v + barycentric.y() * vertices[1].v + barycentric.z() * vertices[2].v;
 
                 if (drawData.normalMap)
-                    getNormalFromMap(drawData, vertices, u, v, normal);
+                {
+                    const QVector3D uTangent = barycentric.x() * vertices[0].uTangent +
+                                               barycentric.y() * vertices[1].uTangent +
+                                               barycentric.z() * vertices[2].uTangent;
+                    const QVector3D vTangent = barycentric.x() * vertices[0].vTangent +
+                                               barycentric.y() * vertices[1].vTangent +
+                                               barycentric.z() * vertices[2].vTangent;
+                    getNormalFromMap(drawData, vertices, u, v, normal, uTangent, vTangent);
+                }
 
                 QColor color;
                 getColor(drawData, u, v, color);
@@ -216,7 +223,8 @@ void Triangle::draw(DrawData &drawData)
 }
 
 void Triangle::getNormalFromMap(
-    const DrawData &drawData, const std::array<VertexStruct, 3> &vertices, float u, float v, QVector3D &normal
+    const DrawData &drawData, const std::array<VertexStruct, 3> &vertices, float u, float v, QVector3D &normal,
+    const QVector3D &uTangent, const QVector3D &vTangent
 )
 {
     const int uX = qBound(0, static_cast<int>(u * drawData.normalMap->width()), drawData.normalMap->width() - 1);
@@ -227,13 +235,14 @@ void Triangle::getNormalFromMap(
             normalColor.redF() * 2.0f - 1.0f, normalColor.greenF() * 2.0f - 1.0f, normalColor.blueF() * 2.0f - 1.0f
         )
             .normalized();
-    // M3x3 = [Pu, Pv, N] but in QMatrix4x4
     QMatrix4x4 M3x3;
-    M3x3.setColumn(0, vertices[0].uTangent);
-    M3x3.setColumn(1, vertices[0].vTangent);
-    M3x3.setColumn(2, vertices[0].normal);
+    M3x3.setColumn(0, uTangent);
+    M3x3.setColumn(1, vTangent);
+    M3x3.setColumn(2, normal);
+    M3x3 = M3x3.inverted();
+
     const QVector3D normalMapNormal = (M3x3 * textureVector).normalized();
-    normal                          = normalMapNormal;
+    normal                          = -textureVector;
 }
 
 QColor &Triangle::getColor(const DrawData &drawData, float u, float v, QColor &color)

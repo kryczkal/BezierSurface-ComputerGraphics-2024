@@ -8,8 +8,6 @@
 #include "utils/DrawUtils.h"
 #include <QMatrix4x4>
 
-LightSource::LightSource(QVector3D position) : position(position) {}
-
 void LightSource::draw(DrawData &drawData)
 {
     const float zFactor = 1.0f + position.z();
@@ -20,8 +18,8 @@ void LightSource::draw(DrawData &drawData)
         settings.lightSettings.lightSourceObjectSize * 2 * zFactor
     );
     DrawUtils::drawPoint(
-        drawData, position, settings.lightSettings.lightSourceObjectColor,
-        settings.lightSettings.lightSourceObjectSize * zFactor, settings.lightSettings.lightSourceObjectSize * zFactor
+        drawData, position, color, settings.lightSettings.lightSourceObjectSize * zFactor,
+        settings.lightSettings.lightSourceObjectSize * zFactor
     );
 }
 

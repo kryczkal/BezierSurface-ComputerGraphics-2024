@@ -19,8 +19,7 @@ class LightSettings
     float orbitSpeed      = 0.01f;
     QVector3D orbitCenter = QVector3D(0.5, 0.5, 0.5);
 
-    QColor lightSourceObjectColor = QColor(155, 155, 0);
-    int lightSourceObjectSize     = 5;
+    int lightSourceObjectSize = 5;
 
     bool isLightSourceEnabled = true;
 };

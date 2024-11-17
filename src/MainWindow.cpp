@@ -185,8 +185,7 @@ void MainWindow::setupMiscBox(
             QColor color = QColorDialog::getColor(Qt::white, centralWidget);
             if (color.isValid())
             {
-                Settings &settings                            = Settings::getInstance();
-                settings.lightSettings.lightSourceObjectColor = color;
+                Settings &settings = Settings::getInstance();
                 lightSource->setColor(color);
             }
         }
@@ -430,7 +429,7 @@ void MainWindow::setupEngine(
 {
     engine        = new QGraphicsEngine(settings.graphicsEngineSettings.sizeX, settings.graphicsEngineSettings.sizeY);
     bezierSurface = QSharedPointer<BezierSurface>(new BezierSurface("crazy.txt"));
-    lightSource   = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 0)));
+    lightSource   = QSharedPointer<LightSource>(new LightSource());
     texture       = QSharedPointer<QImage>(new QImage("textures/testTexture1.jpg"));
     scene->addItem(engine);
     QSharedPointer<QGraphicsEngineDrawable> drawable = QSharedPointer<QGraphicsEngineDrawable>(bezierSurface);

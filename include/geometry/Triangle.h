@@ -67,7 +67,8 @@ class Triangle : public QGraphicsEngineDrawable
     static QColor &getColor(const DrawData &drawData, float u, float v, QColor &color);
 
     static void getNormalFromMap(
-        const DrawData &drawData, const std::array<VertexStruct, 3> &vertices, float u, float v, QVector3D &normal
+        const DrawData &drawData, const std::array<VertexStruct, 3> &vertices, float u, float v, QVector3D &normal,
+        const QVector3D &uTangent, const QVector3D &vTangent
     );
 };
 
