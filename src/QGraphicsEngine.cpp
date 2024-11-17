@@ -124,7 +124,6 @@ void QGraphicsEngine::rotate(float x, float y, float z)
     {
         drawable->transform(rotationMatrix);
     }
-    draw();
 }
 
 void QGraphicsEngine::addLightSource(QSharedPointer<LightSource> lightSource)

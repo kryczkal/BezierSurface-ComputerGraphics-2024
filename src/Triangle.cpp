@@ -188,11 +188,9 @@ void Triangle::draw(DrawData &drawData)
                 float z =
                     barycentric.x() * vertices[0].z + barycentric.y() * vertices[1].z + barycentric.z() * vertices[2].z;
 
-                QMutexLocker locker(&drawData.zBufferMutex);
-                if (z < drawData.zBuffer[x][y])
+                if (z < drawData.zBuffer.data()[x * height + y])
                     continue;
-                drawData.zBuffer[x][y] = z;
-                locker.unlock();
+                drawData.zBuffer.data()[x * height + y] = z;
 
                 QVector3D pos = barycentric.x() * vertices[0].pos + barycentric.y() * vertices[1].pos +
                                 barycentric.z() * vertices[2].pos;

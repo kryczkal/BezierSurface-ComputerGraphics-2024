@@ -11,12 +11,14 @@ void DrawUtils::drawLine(
     DrawData &drawData, const QVector3D &start, const QVector3D &end, const QColor &color, float width
 )
 {
-    int x0   = start.x() * drawData.canvas.width();
-    int y0   = start.y() * drawData.canvas.height();
-    int x1   = end.x() * drawData.canvas.width();
-    int y1   = end.y() * drawData.canvas.height();
-    float z0 = start.z();
-    float z1 = end.z();
+    const int canvasWidth  = drawData.canvas.width();
+    const int canvasHeight = drawData.canvas.height();
+    int x0                 = (int)(start.x() * canvasWidth);
+    int y0                 = (int)(start.y() * canvasHeight);
+    int x1                 = (int)(end.x() * canvasWidth);
+    int y1                 = (int)(end.y() * canvasHeight);
+    float z0               = start.z();
+    float z1               = end.z();
 
     int dx  = std::abs(x1 - x0);
     int dy  = -std::abs(y1 - y0);
@@ -24,14 +26,14 @@ void DrawUtils::drawLine(
     int sy  = y0 < y1 ? 1 : -1;
     int err = dx + dy;
 
-    float totalLength = std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
-    float halfWidth   = std::max(1.0f, width / 2.0f);
+    auto totalLength = (float)std::sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+    float halfWidth  = std::max(1.0f, width / 2.0f);
 
     while (true)
     {
         float currentLength = std::sqrt(
-            (x0 - start.x() * drawData.canvas.width()) * (x0 - start.x() * drawData.canvas.width()) +
-            (y0 - start.y() * drawData.canvas.height()) * (y0 - start.y() * drawData.canvas.height())
+            (x0 - start.x() * canvasWidth) * (x0 - start.x() * canvasWidth) +
+            (y0 - start.y() * canvasHeight) * (y0 - start.y() * canvasHeight)
         );
         float t      = totalLength == 0 ? 0.0f : currentLength / totalLength;
         float zValue = z0 + t * (z1 - z0);
@@ -42,11 +44,11 @@ void DrawUtils::drawLine(
             {
                 int px = x0 + wx;
                 int py = y0 + wy;
-                if (px >= 0 && px < drawData.canvas.width() && py >= 0 && py < drawData.canvas.height())
+                if (px >= 0 && px < canvasWidth && py >= 0 && py < canvasHeight)
                 {
-                    if (zValue < drawData.zBuffer[px][py])
+                    if (zValue < drawData.zBuffer.data()[px * canvasWidth + py])
                         continue;
-                    drawData.zBuffer[px][py] = zValue;
+                    drawData.zBuffer.data()[px * canvasWidth + py] = zValue;
                     drawData.canvas.setPixelColor(px, py, color);
                 }
             }
@@ -71,17 +73,19 @@ void DrawUtils::drawLine(
 
 void DrawUtils::drawPoint(DrawData &drawData, const QVector3D &point, const QColor &color, int radiusX, int radiusY)
 {
-    int x = point.x() * drawData.canvas.width();
-    int y = point.y() * drawData.canvas.height();
+    const int canvasWidth  = drawData.canvas.width();
+    const int canvasHeight = drawData.canvas.height();
+    int x                  = point.x() * canvasWidth;
+    int y                  = point.y() * canvasHeight;
     for (int xm = x - radiusX; xm <= x + radiusX; ++xm)
     {
         for (int ym = y - radiusY; ym <= y + radiusY; ++ym)
         {
-            if (xm >= 0 && xm < drawData.canvas.width() && ym >= 0 && ym < drawData.canvas.height())
+            if (xm >= 0 && xm < canvasWidth && ym >= 0 && ym < canvasHeight)
             {
-                if (point.z() < drawData.zBuffer[xm][ym])
+                if (point.z() < drawData.zBuffer.data()[xm * canvasWidth + ym])
                     continue;
-                drawData.zBuffer[xm][ym] = point.z();
+                drawData.zBuffer.data()[xm * canvasWidth + ym] = point.z();
                 drawData.canvas.setPixelColor(xm, ym, color);
             }
         }

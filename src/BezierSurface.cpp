@@ -172,12 +172,13 @@ void BezierSurface::evaluateBezierSurface(Vertex &vertex) const
 
 void BezierSurface::draw(DrawData &drawData)
 {
+    Mesh::draw(drawData);
+    QMutexLocker locker(&_mutex);
     Settings &settings = Settings::getInstance();
     if (!drawData.texture)
         drawData.setBrushColor(settings.bezierSurfaceSettings.defaultColor);
     if (Settings::getInstance().bezierSurfaceSettings.showControlPoints)
         drawControlPointsAndGrid(drawData);
-    Mesh::draw(drawData);
 }
 
 void BezierSurface::drawControlPointsAndGrid(DrawData &drawData)
@@ -211,6 +212,7 @@ void BezierSurface::drawControlPointsAndGrid(DrawData &drawData)
 void BezierSurface::transform(QMatrix4x4 &matrix)
 {
     Mesh::transform(matrix);
+    QMutexLocker locker(&_mutex);
     for (int i = 0; i < _controlPointsNormal.size(); ++i)
     {
         _controlPointsTransformed[i] = _modelMatrix * _controlPointsNormal[i];

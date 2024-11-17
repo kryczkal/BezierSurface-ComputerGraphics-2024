@@ -25,14 +25,11 @@ class DrawData
     QSharedPointer<QImage> normalMap;
 
     QMutex zBufferMutex;
-    QVector<QVector<float>> zBuffer;
+    QScopedPointer<float, QScopedPointerArrayDeleter<float>> zBuffer;
     LightSource *lightSource = nullptr;
 
-    void clearZBuffer();
-
-    void clear();
-
-    void clear(const QColor &color);
+    void initZBuffer();
+    void clearZBuffer() const;
 
     void setTexture(const QImage &texture);
 
