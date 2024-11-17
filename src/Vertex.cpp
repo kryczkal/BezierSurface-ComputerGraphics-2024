@@ -29,8 +29,8 @@ void Vertex::draw(DrawData &drawData)
     const auto &settings = Settings::getInstance();
     QVector3D position   = _positionTransformed;
 
-    int radiusX = std::max(1.0f, settings.graphicsEngineSettings.sizeX * settings.vertexSettings.radiusCoef);
-    int radiusY = std::max(1.0f, settings.graphicsEngineSettings.sizeY * settings.vertexSettings.radiusCoef);
+    const int radiusX = std::max(1.0f, settings.graphicsEngineSettings.sizeX * settings.vertexSettings.radiusCoef);
+    const int radiusY = std::max(1.0f, settings.graphicsEngineSettings.sizeY * settings.vertexSettings.radiusCoef);
 
     DrawUtils::drawPoint(drawData, _positionTransformed, settings.vertexSettings.vertexColor, radiusX, radiusY);
 

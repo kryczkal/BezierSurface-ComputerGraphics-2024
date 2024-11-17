@@ -22,14 +22,14 @@ class Mesh : public QGraphicsEngineDrawable
     // Getters
     [[maybe_unused]] [[nodiscard]] QVector<Triangle> getTriangles() const;
 
-    QSharedPointer<QImage> getTexture() const { return _texture; }
+    [[nodiscard]] QSharedPointer<QImage> getTexture() const { return _texture; }
     void setTexture(QSharedPointer<QImage> texture)
     {
         QMutexLocker locker(&_mutex);
         _texture = texture;
     }
 
-    QSharedPointer<QImage> getNormalMap() const { return _normalMap; }
+    [[nodiscard]] QSharedPointer<QImage> getNormalMap() const { return _normalMap; }
     void setNormalMap(QSharedPointer<QImage> normalMap)
     {
         QMutexLocker locker(&_mutex);

@@ -35,35 +35,19 @@ Vertex &Triangle::operator[](int i)
 
 void Triangle::draw(DrawData &drawData)
 {
-    struct Vertex
-    {
-        float x, y, z;
-        QVector3D pos;
-        QVector3D normal;
-        float u, v;
-        QVector3D uTangent;
-        QVector3D vTangent;
-    };
-
-    struct Edge
-    {
-        int yMax;
-        float x;
-        float xStep;
-    };
 
     Settings &settings = Settings::getInstance();
 
-    QVector3D posA = _a.getPositionTransformed();
-    QVector3D posB = _b.getPositionTransformed();
-    QVector3D posC = _c.getPositionTransformed();
+    const QVector3D posA = _a.getPositionTransformed();
+    const QVector3D posB = _b.getPositionTransformed();
+    const QVector3D posC = _c.getPositionTransformed();
 
-    QVector3D normalA = _a.getNormalTransformed().normalized();
-    QVector3D normalB = _b.getNormalTransformed().normalized();
-    QVector3D normalC = _c.getNormalTransformed().normalized();
+    const QVector3D normalA = _a.getNormalTransformed().normalized();
+    const QVector3D normalB = _b.getNormalTransformed().normalized();
+    const QVector3D normalC = _c.getNormalTransformed().normalized();
 
-    int width  = drawData.canvas.width();
-    int height = drawData.canvas.height();
+    const int width  = drawData.canvas.width();
+    const int height = drawData.canvas.height();
 
     float x0 = posA.x() * width;
     float y0 = posA.y() * height;
@@ -77,57 +61,54 @@ void Triangle::draw(DrawData &drawData)
     float y2 = posC.y() * height;
     float z2 = posC.z();
 
-    Vertex v0 = {
+    const VertexStruct v0 = {
         x0, y0, z0, posA, normalA, _a.getU(), _a.getV(), _a.getUTangentTransformed(), _a.getVTangentTransformed()
     };
-    Vertex v1 = {
+    const VertexStruct v1 = {
         x1, y1, z1, posB, normalB, _b.getU(), _b.getV(), _b.getUTangentTransformed(), _b.getVTangentTransformed()
     };
-    Vertex v2 = {
+    const VertexStruct v2 = {
         x2, y2, z2, posC, normalC, _c.getU(), _c.getV(), _c.getUTangentTransformed(), _c.getVTangentTransformed()
     };
 
-    std::array<Vertex, 3> vertices = {v0, v1, v2};
+    std::array<VertexStruct, 3> vertices = {v0, v1, v2};
     std::sort(
         vertices.begin(), vertices.end(),
-        [](const Vertex &a, const Vertex &b)
+        [](const VertexStruct &a, const VertexStruct &b)
         {
             return a.y < b.y;
         }
     );
 
-    int minY = static_cast<int>(std::ceil(vertices[0].y));
-    int maxY = static_cast<int>(std::floor(vertices[2].y));
+    const int minY = std::max(static_cast<int>(std::ceil(vertices[0].y)), 0);
+    const int maxY = std::min(static_cast<int>(std::floor(vertices[2].y)), height - 1);
 
-    minY = std::max(minY, 0);
-    maxY = std::min(maxY, height - 1);
-
-    auto createEdge = [](const Vertex &vStart, const Vertex &vEnd) -> Edge
+    auto createEdge = [](const VertexStruct &vStart, const VertexStruct &vEnd) -> EdgeStruct
     {
         if (vStart.y == vEnd.y)
             return {0, 0, 0};
 
-        float dy = vEnd.y - vStart.y;
-        float dx = vEnd.x - vStart.x;
+        const float dy = vEnd.y - vStart.y;
+        const float dx = vEnd.x - vStart.x;
 
-        float xStep = dx / dy;
-        int yMin    = static_cast<int>(std::ceil(vStart.y));
-        int yMax    = static_cast<int>(std::ceil(vEnd.y)) - 1;
+        const float xStep = dx / dy;
+        const int yMin    = static_cast<int>(std::ceil(vStart.y));
+        const int yMax    = static_cast<int>(std::ceil(vEnd.y)) - 1;
 
-        float x = vStart.x + (yMin - vStart.y) * xStep;
+        const float x = vStart.x + (yMin - vStart.y) * xStep;
 
         return {yMax, x, xStep};
     };
 
-    std::vector<std::vector<Edge>> edgeTable(height);
+    std::vector<std::vector<EdgeStruct>> edgeTable(height);
 
-    auto addEdgeToTable = [&](const Vertex &vStart, const Vertex &vEnd)
+    auto addEdgeToTable = [&](const VertexStruct &vStart, const VertexStruct &vEnd)
     {
         if (vStart.y == vEnd.y)
             return;
 
-        Edge edge  = createEdge(vStart, vEnd);
-        int yIndex = static_cast<int>(std::ceil(vStart.y));
+        const EdgeStruct edge = createEdge(vStart, vEnd);
+        const int yIndex      = static_cast<int>(std::ceil(vStart.y));
         if (yIndex >= 0 && yIndex < height)
             edgeTable[yIndex].push_back(edge);
     };
@@ -136,7 +117,7 @@ void Triangle::draw(DrawData &drawData)
     addEdgeToTable(vertices[1], vertices[2]);
     addEdgeToTable(vertices[0], vertices[2]);
 
-    std::vector<Edge> activeEdgeTable;
+    std::vector<EdgeStruct> activeEdgeTable;
 
     for (int y = minY; y <= maxY; ++y)
     {
@@ -148,7 +129,7 @@ void Triangle::draw(DrawData &drawData)
         activeEdgeTable.erase(
             std::remove_if(
                 activeEdgeTable.begin(), activeEdgeTable.end(),
-                [y](const Edge &e)
+                [y](const EdgeStruct &e)
                 {
                     return y > e.yMax;
                 }
@@ -161,7 +142,7 @@ void Triangle::draw(DrawData &drawData)
 
         std::sort(
             activeEdgeTable.begin(), activeEdgeTable.end(),
-            [](const Edge &a, const Edge &b)
+            [](const EdgeStruct &a, const EdgeStruct &b)
             {
                 return a.x < b.x;
             }
@@ -192,60 +173,30 @@ void Triangle::draw(DrawData &drawData)
                     continue;
                 drawData.zBuffer.data()[x * height + y] = z;
 
-                QVector3D pos = barycentric.x() * vertices[0].pos + barycentric.y() * vertices[1].pos +
-                                barycentric.z() * vertices[2].pos;
+                const QVector3D pos = barycentric.x() * vertices[0].pos + barycentric.y() * vertices[1].pos +
+                                      barycentric.z() * vertices[2].pos;
                 QVector3D normal = (barycentric.x() * vertices[0].normal + barycentric.y() * vertices[1].normal +
                                     barycentric.z() * vertices[2].normal)
                                        .normalized();
 
-                float u =
+                const float u =
                     barycentric.x() * vertices[0].u + barycentric.y() * vertices[1].u + barycentric.z() * vertices[2].u;
-                float v =
+                const float v =
                     barycentric.x() * vertices[0].v + barycentric.y() * vertices[1].v + barycentric.z() * vertices[2].v;
 
-                int uX = 0;
-                int vY = 0;
-
                 if (drawData.normalMap)
-                {
-                    uX = qBound(0, static_cast<int>(u * drawData.normalMap->width()), drawData.normalMap->width() - 1);
-                    vY =
-                        qBound(0, static_cast<int>(v * drawData.normalMap->height()), drawData.normalMap->height() - 1);
-                    QColor normalColor      = drawData.normalMap->pixelColor(uX, vY);
-                    QVector3D textureVector = QVector3D(
-                                                  normalColor.redF() * 2.0f - 1.0f, normalColor.greenF() * 2.0f - 1.0f,
-                                                  normalColor.blueF() * 2.0f - 1.0f
-                    )
-                                                  .normalized();
-                    // M3x3 = [Pu, Pv, N] but in QMatrix4x4
-                    QMatrix4x4 M3x3;
-                    M3x3.setColumn(0, vertices[0].uTangent);
-                    M3x3.setColumn(1, vertices[0].vTangent);
-                    M3x3.setColumn(2, vertices[0].normal);
-                    QVector3D normalMapNormal = M3x3 * textureVector;
-                    normalMapNormal.normalize();
-                    normal = normalMapNormal;
-                }
+                    getNormalFromMap(drawData, vertices, u, v, normal);
 
                 QColor color;
-                if (drawData.texture)
-                {
-                    uX    = qBound(0, static_cast<int>(u * drawData.texture->width()), drawData.texture->width() - 1);
-                    vY    = qBound(0, static_cast<int>(v * drawData.texture->height()), drawData.texture->height() - 1);
-                    color = drawData.texture->pixelColor(uX, vY);
-                }
-                else
-                {
-                    color = drawData.brushColor;
-                }
+                getColor(drawData, u, v, color);
 
                 if (settings.triangleSettings.debugDraw)
                 {
-                    drawPixelDebug(drawData, x, y);
+                    drawPixelDebug(drawData, settings, y, x, barycentric, pos, normal);
                 }
                 else
                 {
-                    drawPixel(drawData, pos, normal, color, x, y);
+                    DrawUtils::drawPixel(drawData, pos, normal, color, x, y);
                 }
             }
         }
@@ -261,6 +212,59 @@ void Triangle::draw(DrawData &drawData)
         _a.draw(drawData);
         _b.draw(drawData);
         _c.draw(drawData);
+    }
+}
+
+void Triangle::getNormalFromMap(
+    const DrawData &drawData, const std::array<VertexStruct, 3> &vertices, float u, float v, QVector3D &normal
+)
+{
+    const int uX = qBound(0, static_cast<int>(u * drawData.normalMap->width()), drawData.normalMap->width() - 1);
+    const int vY = qBound(0, static_cast<int>(v * drawData.normalMap->height()), drawData.normalMap->height() - 1);
+    const QColor normalColor = drawData.normalMap->pixelColor(uX, vY);
+    const QVector3D textureVector =
+        QVector3D(
+            normalColor.redF() * 2.0f - 1.0f, normalColor.greenF() * 2.0f - 1.0f, normalColor.blueF() * 2.0f - 1.0f
+        )
+            .normalized();
+    // M3x3 = [Pu, Pv, N] but in QMatrix4x4
+    QMatrix4x4 M3x3;
+    M3x3.setColumn(0, vertices[0].uTangent);
+    M3x3.setColumn(1, vertices[0].vTangent);
+    M3x3.setColumn(2, vertices[0].normal);
+    const QVector3D normalMapNormal = (M3x3 * textureVector).normalized();
+    normal                          = normalMapNormal;
+}
+
+QColor &Triangle::getColor(const DrawData &drawData, float u, float v, QColor &color)
+{
+    if (drawData.texture)
+    {
+        const int uX = qBound(0, static_cast<int>(u * drawData.texture->width()), drawData.texture->width() - 1);
+        const int vY = qBound(0, static_cast<int>(v * drawData.texture->height()), drawData.texture->height() - 1);
+        color        = drawData.texture->pixelColor(uX, vY);
+    }
+    else
+    {
+        color = drawData.brushColor;
+    }
+    return color;
+}
+
+void Triangle::drawPixelDebug(
+    DrawData &drawData, Settings &settings, int y, int x, const QVector3D &barycentric, const QVector3D &pos,
+    const QVector3D &normal
+)
+{
+    drawData.lightSource = nullptr;
+    const float coeff    = settings.triangleSettings.triangleEdgeDrawProximityCoef;
+    if (barycentric.x() < coeff || barycentric.y() < coeff || barycentric.z() < coeff)
+    {
+        DrawUtils::drawPixel(drawData, pos, normal, settings.triangleSettings.triangleEdgeColor, x, y);
+    }
+    else
+    {
+        DrawUtils::drawPixel(drawData, pos, normal, settings.triangleSettings.triangleFillColor, x, y);
     }
 }
 
@@ -280,51 +284,6 @@ Triangle::computeBarycentricCoordinates(const QVector2D &p, const QVector2D &a, 
     return QVector3D(w0, w1, w2);
 }
 
-void Triangle::drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, QColor &color, int x, int y)
-{
-    Settings &settings = Settings::getInstance();
-
-    if (settings.lightSettings.isLightSourceEnabled && drawData.lightSource)
-    {
-        QColor lightColor = drawData.lightSource->getColor();
-        QVector3D L       = drawData.lightSource->calcVersorTo(pos).normalized();
-        QVector3D N       = normal;
-        QVector3D V(0.0f, 0.0f, 1.0f);
-
-        float cosNL = std::max(0.0f, QVector3D::dotProduct(N, L));
-        QVector3D R = (2.0f * QVector3D::dotProduct(N, L) * N - L).normalized();
-        float cosVR = std::max(0.0f, QVector3D::dotProduct(V, R));
-
-        float kd = settings.lightSettings.kdCoef;
-        float ks = settings.lightSettings.ksCoef;
-        float m  = settings.lightSettings.m;
-
-        float IL_r = lightColor.redF();
-        float IL_g = lightColor.greenF();
-        float IL_b = lightColor.blueF();
-
-        float IO_r = color.redF();
-        float IO_g = color.greenF();
-        float IO_b = color.blueF();
-
-        float r = kd * IL_r * IO_r * cosNL + ks * IL_r * IO_r * std::pow(cosVR, m);
-        float g = kd * IL_g * IO_g * cosNL + ks * IL_g * IO_g * std::pow(cosVR, m);
-        float b = kd * IL_b * IO_b * cosNL + ks * IL_b * IO_b * std::pow(cosVR, m);
-
-        r = std::min(1.0f, r);
-        g = std::min(1.0f, g);
-        b = std::min(1.0f, b);
-
-        color = QColor::fromRgbF(r, g, b);
-    }
-
-    drawData.canvas.setPixelColor(x, y, color);
-}
-
-void Triangle::drawPixelDebug(DrawData &drawData, int x, int y)
-{
-    drawData.canvas.setPixelColor(x, y, Settings::getInstance().triangleSettings.triangleFillColor);
-}
 void Triangle::transform(QMatrix4x4 &matrix)
 {
     _a.transform(matrix);

@@ -11,6 +11,23 @@
 
 class DrawData;
 
+struct VertexStruct
+{
+    float x, y, z;
+    QVector3D pos;
+    QVector3D normal;
+    float u, v;
+    QVector3D uTangent;
+    QVector3D vTangent;
+};
+
+struct EdgeStruct
+{
+    int yMax;
+    float x;
+    float xStep;
+};
+
 class Triangle : public QGraphicsEngineDrawable
 {
     public:
@@ -42,13 +59,16 @@ class Triangle : public QGraphicsEngineDrawable
     static QVector3D
     computeBarycentricCoordinates(const QVector2D &p, const QVector2D &a, const QVector2D &b, const QVector2D &c);
 
-    void drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, int x, int y);
+    static void drawPixelDebug(
+        DrawData &drawData, Settings &settings, int y, int x, const QVector3D &barycentric, const QVector3D &pos,
+        const QVector3D &normal
+    );
 
-    void drawPixelDebug(DrawData &drawData, int x, int y);
+    static QColor &getColor(const DrawData &drawData, float u, float v, QColor &color);
 
-    void drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, int x, int y, int u, int v);
-
-    void drawPixel(DrawData &drawData, const QVector3D &pos, const QVector3D &normal, QColor &color, int x, int y);
+    static void getNormalFromMap(
+        const DrawData &drawData, const std::array<VertexStruct, 3> &vertices, float u, float v, QVector3D &normal
+    );
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_TRIANGLE_H

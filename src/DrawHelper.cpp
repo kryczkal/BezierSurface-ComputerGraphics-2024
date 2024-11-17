@@ -2,6 +2,7 @@
 // Created by wookie on 11/8/24.
 //
 
+#include "settings/Settings.h"
 #include "utils/DrawUtils.h"
 #include <QDebug>
 #include <QVector3D>
@@ -90,4 +91,47 @@ void DrawUtils::drawPoint(DrawData &drawData, const QVector3D &point, const QCol
             }
         }
     }
+}
+
+void
+
+DrawUtils::drawPixel(DrawData &drawData, const QVector3D &position3d, const QVector3D &normal, QColor &color, const int x, const int y)
+{
+    Settings &settings = Settings::getInstance();
+
+    if (settings.lightSettings.isLightSourceEnabled && drawData.lightSource)
+    {
+        QColor lightColor = drawData.lightSource->getColor();
+        QVector3D L       = drawData.lightSource->calcVersorTo(position3d).normalized();
+        QVector3D N       = normal;
+        QVector3D V(0.0f, 0.0f, 1.0f);
+
+        float cosNL = std::max(0.0f, QVector3D::dotProduct(N, L));
+        QVector3D R = (2.0f * QVector3D::dotProduct(N, L) * N - L).normalized();
+        float cosVR = std::max(0.0f, QVector3D::dotProduct(V, R));
+
+        float kd = settings.lightSettings.kdCoef;
+        float ks = settings.lightSettings.ksCoef;
+        float m  = settings.lightSettings.m;
+
+        float IL_r = lightColor.redF();
+        float IL_g = lightColor.greenF();
+        float IL_b = lightColor.blueF();
+
+        float IO_r = color.redF();
+        float IO_g = color.greenF();
+        float IO_b = color.blueF();
+
+        float r = kd * IL_r * IO_r * cosNL + ks * IL_r * IO_r * std::pow(cosVR, m);
+        float g = kd * IL_g * IO_g * cosNL + ks * IL_g * IO_g * std::pow(cosVR, m);
+        float b = kd * IL_b * IO_b * cosNL + ks * IL_b * IO_b * std::pow(cosVR, m);
+
+        r = std::min(1.0f, r);
+        g = std::min(1.0f, g);
+        b = std::min(1.0f, b);
+
+        color = QColor::fromRgbF(r, g, b);
+    }
+
+    drawData.canvas.setPixelColor(x, y, color);
 }

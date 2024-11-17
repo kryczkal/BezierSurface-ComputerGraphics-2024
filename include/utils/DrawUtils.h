@@ -18,6 +18,9 @@ class DrawUtils
         DrawData &drawData, const QVector3D &point, const QColor &color = Qt::black, int radiusX = 1.0f,
         int radiusY = 1.0f
     );
+
+    static void
+    drawPixel(DrawData &drawData, const QVector3D &position3d, const QVector3D &normal, QColor &color, int x, int y);
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_DRAWUTILS_H
