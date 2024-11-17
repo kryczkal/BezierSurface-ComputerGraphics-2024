@@ -148,6 +148,17 @@ void MainWindow::setupMiscBox(
         }
     );
 
+    // Clear Normal Map Button
+    QPushButton *clearNormalMapButton = new QPushButton("Clear Normal Map");
+    normalMapLayout->addWidget(clearNormalMapButton);
+    connect(
+        clearNormalMapButton, &QPushButton::clicked,
+        [=](bool)
+        {
+            bezierSurface->setNormalMap(nullptr);
+        }
+    );
+
     // Pick Bezier Surface Color
     QPushButton *pickBezierSurfaceColorButton = new QPushButton("Pick Bezier Surface Color");
     normalMapLayout->addWidget(pickBezierSurfaceColorButton);
@@ -309,6 +320,25 @@ void MainWindow::setupLightningBox(const QWidget *centralWidget, QVBoxLayout *le
         }
     );
 
+    QLabel *lightSourceLabel   = new QLabel("Light Source Z - Position");
+    QSlider *lightSourceSlider = new QSlider(Qt::Horizontal);
+    lightSourceSlider->setRange(0, 100);
+    int divConst = 60;
+    lightSourceSlider->setValue(Settings::getInstance().lightSettings.orbitCenter.z() * divConst);
+    lightSourceSlider->setTickInterval(1);
+    lightSourceSlider->setTickPosition(QSlider::TicksBelow);
+    lightSettingsLayout->addWidget(lightSourceLabel);
+    lightSettingsLayout->addWidget(lightSourceSlider);
+    connect(
+        lightSourceSlider, &QSlider::valueChanged,
+        [centralWidget, divConst](int value)
+        {
+            Settings &settings     = Settings::getInstance();
+            QVector3D &lightCenter = settings.lightSettings.orbitCenter;
+            lightCenter.setZ(value / (float)divConst);
+        }
+    );
+
     leftToolbarLayout->addWidget(lightSettingsBox);
 }
 
@@ -400,8 +430,8 @@ void MainWindow::setupEngine(
 {
     engine        = new QGraphicsEngine(settings.graphicsEngineSettings.sizeX, settings.graphicsEngineSettings.sizeY);
     bezierSurface = QSharedPointer<BezierSurface>(new BezierSurface("crazy.txt"));
-    lightSource   = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 3)));
-    texture       = QSharedPointer<QImage>(new QImage("textures/testTexture1.png"));
+    lightSource   = QSharedPointer<LightSource>(new LightSource(QVector3D(0, 0, 0)));
+    texture       = QSharedPointer<QImage>(new QImage("textures/testTexture1.jpg"));
     scene->addItem(engine);
     QSharedPointer<QGraphicsEngineDrawable> drawable = QSharedPointer<QGraphicsEngineDrawable>(bezierSurface);
     engine->addDrawable(drawable);

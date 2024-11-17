@@ -104,7 +104,7 @@ DrawUtils::drawPixel(DrawData &drawData, const QVector3D &position3d, const QVec
         QColor lightColor = drawData.lightSource->getColor();
         QVector3D L       = drawData.lightSource->calcVersorTo(position3d).normalized();
         QVector3D N       = normal;
-        QVector3D V(0.0f, 0.0f, 1.0f);
+        QVector3D V(0.0f, 0.0f, -1.0f);
 
         float cosNL = std::max(0.0f, QVector3D::dotProduct(N, L));
         QVector3D R = (2.0f * QVector3D::dotProduct(N, L) * N - L).normalized();

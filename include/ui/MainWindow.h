@@ -29,8 +29,6 @@ class MainWindow : public QMainWindow
         QSlider *&yRotationSlider, QSlider *&zRotationSlider
     ) const;
 
-    void setupLightningBox(const QWidget *centralWidget, QVBoxLayout *leftToolbarLayout) const;
-
     void setupBezierSurfaceBox(const QWidget *centralWidget, QVBoxLayout *leftToolbarLayout) const;
 
     void setupMiscBox(
@@ -38,5 +36,7 @@ class MainWindow : public QMainWindow
         QSharedPointer<LightSource> &lightSource, QVBoxLayout *leftToolbarLayout, const QSlider *xRotationSlider,
         const QSlider *yRotationSlider, const QSlider *zRotationSlider
     ) const;
+
+    void setupLightningBox(const QWidget *centralWidget, QVBoxLayout *leftToolbarLayout) const;
 };
 #endif // MAINWINDOW_H

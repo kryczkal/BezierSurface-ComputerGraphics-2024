@@ -12,10 +12,16 @@ LightSource::LightSource(QVector3D position) : position(position) {}
 
 void LightSource::draw(DrawData &drawData)
 {
+    const float zFactor = 1.0f + position.z();
+
     Settings &settings = Settings::getInstance();
     DrawUtils::drawPoint(
-        drawData, position, settings.lightSettings.lightSourceObjectColor, settings.lightSettings.lightSourceObjectSize,
-        settings.lightSettings.lightSourceObjectSize
+        drawData, position, Qt::black, settings.lightSettings.lightSourceObjectSize * 2 * zFactor,
+        settings.lightSettings.lightSourceObjectSize * 2 * zFactor
+    );
+    DrawUtils::drawPoint(
+        drawData, position, settings.lightSettings.lightSourceObjectColor,
+        settings.lightSettings.lightSourceObjectSize * zFactor, settings.lightSettings.lightSourceObjectSize * zFactor
     );
 }
 

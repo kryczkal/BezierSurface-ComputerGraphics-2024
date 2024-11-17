@@ -141,6 +141,13 @@ void QGraphicsEngine::clearLightSources()
 void QGraphicsEngine::autoMoveLightSources()
 {
     Settings &settings = Settings::getInstance();
+    // get current time
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    // get current time in milliseconds
+    qint64 currentMSecsSinceEpoch = currentDateTime.toMSecsSinceEpoch();
+    // calc radius as a function of time
+    settings.lightSettings.orbitRadius = 0.27f + 0.13f * sin(currentMSecsSinceEpoch / 500.0f);
+
     for (auto &lightSource : _lightSources)
     {
         QVector3D &position = lightSource->getPosition();
