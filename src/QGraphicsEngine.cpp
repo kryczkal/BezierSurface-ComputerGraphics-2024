@@ -73,8 +73,10 @@ void QGraphicsEngine::clearDrawables() { _drawables.clear(); }
 
 void QGraphicsEngine::draw()
 {
-    _qImage.fill(Settings::getInstance().graphicsEngineSettings.backgroundColor);
+    Settings &settings = Settings::getInstance();
+    _qImage.fill(settings.graphicsEngineSettings.backgroundColor);
     DrawData drawData(_qImage);
+    drawData.brushColor  = settings.bezierSurfaceSettings.defaultColor;
     drawData.lightSource = _lightSources.size() > 0 ? _lightSources[0].data() : nullptr;
 
     //    QMutexLocker locker(&_drawMutex);

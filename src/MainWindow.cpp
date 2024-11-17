@@ -84,9 +84,9 @@ void MainWindow::setupMiscBox(
     // Set tessellation level
     QLabel *tessellationLabel   = new QLabel("Tessellation Level");
     QSlider *tessellationSlider = new QSlider(Qt::Horizontal);
-    tessellationSlider->setRange(1, 100);
+    tessellationSlider->setRange(1, 200);
     tessellationSlider->setValue(10);
-    tessellationSlider->setTickInterval(10);
+    tessellationSlider->setTickInterval(20);
     tessellationSlider->setTickPosition(QSlider::TicksBelow);
     normalMapLayout->addWidget(tessellationLabel);
     normalMapLayout->addWidget(tessellationSlider);
