@@ -144,7 +144,7 @@ void QGraphicsEngine::autoMoveLightSources()
 
     QDateTime currentDateTime          = QDateTime::currentDateTime();
     qint64 currentMSecsSinceEpoch      = currentDateTime.toMSecsSinceEpoch();
-    settings.lightSettings.orbitRadius = 0.27f + 0.13f * sin(currentMSecsSinceEpoch / 1000.0f);
+    settings.lightSettings.orbitRadius = 0.15f + 0.10f * sin(currentMSecsSinceEpoch / 1000.0f);
 
     for (auto &lightSource : _lightSources)
     {
