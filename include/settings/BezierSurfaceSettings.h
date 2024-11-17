@@ -10,7 +10,7 @@
 class BezierSurfaceSettings
 {
     public:
-    bool showControlPoints = true;
+    bool showControlPoints = false;
     QColor defaultColor    = Qt::red;
 };
 

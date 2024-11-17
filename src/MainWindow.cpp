@@ -4,7 +4,6 @@
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QFileDialog>
-#include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGroupBox>
@@ -101,13 +100,6 @@ void MainWindow::setupMiscBox(
             rotationZ = zRotationSlider->value();
             bezierSurface->setTessellationLevel(value);
             engine->setRotation(rotationX, rotationY, rotationZ);
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -124,15 +116,7 @@ void MainWindow::setupMiscBox(
             );
             if (!path.isEmpty())
             {
-                Settings &settings = Settings::getInstance();
                 bezierSurface->setNormalMap(QSharedPointer<QImage>(new QImage(path)));
-
-                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-                if (engine)
-                {
-                    engine->draw();
-                }
             }
         }
     );
@@ -148,15 +132,7 @@ void MainWindow::setupMiscBox(
                 QFileDialog::getOpenFileName(centralWidget, "Open Texture", dir.absolutePath(), "Images (*.png *.jpg)");
             if (!path.isEmpty())
             {
-                Settings &settings = Settings::getInstance();
                 bezierSurface->setTexture(QSharedPointer<QImage>(new QImage(path)));
-
-                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-                if (engine)
-                {
-                    engine->draw();
-                }
             }
         }
     );
@@ -168,15 +144,7 @@ void MainWindow::setupMiscBox(
         clearTextureButton, &QPushButton::clicked,
         [=](bool)
         {
-            Settings &settings = Settings::getInstance();
             bezierSurface->setTexture(nullptr);
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -192,13 +160,6 @@ void MainWindow::setupMiscBox(
             {
                 Settings &settings                          = Settings::getInstance();
                 settings.bezierSurfaceSettings.defaultColor = color;
-
-                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-                if (engine)
-                {
-                    engine->draw();
-                }
             }
         }
     );
@@ -216,13 +177,6 @@ void MainWindow::setupMiscBox(
                 Settings &settings                            = Settings::getInstance();
                 settings.lightSettings.lightSourceObjectColor = color;
                 lightSource->setColor(color);
-
-                QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-                QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-                if (engine)
-                {
-                    engine->draw();
-                }
             }
         }
     );
@@ -246,13 +200,6 @@ void MainWindow::setupBezierSurfaceBox(const QWidget *centralWidget, QVBoxLayout
         {
             Settings &settings                  = Settings::getInstance();
             settings.triangleSettings.debugDraw = state == Qt::Checked;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
     QCheckBox *bezierSurfaceCheckbox2 = new QCheckBox("Draw Normals - (In Debug Mode)");
@@ -264,13 +211,6 @@ void MainWindow::setupBezierSurfaceBox(const QWidget *centralWidget, QVBoxLayout
         {
             Settings &settings                  = Settings::getInstance();
             settings.vertexSettings.drawNormals = state == Qt::Checked;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
     QCheckBox *bezierSurfaceCheckbox3 = new QCheckBox("Draw Tangents - (In Debug Mode)");
@@ -282,13 +222,6 @@ void MainWindow::setupBezierSurfaceBox(const QWidget *centralWidget, QVBoxLayout
         {
             Settings &settings                   = Settings::getInstance();
             settings.vertexSettings.drawTangents = state == Qt::Checked;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -301,13 +234,6 @@ void MainWindow::setupBezierSurfaceBox(const QWidget *centralWidget, QVBoxLayout
         {
             Settings &settings                               = Settings::getInstance();
             settings.bezierSurfaceSettings.showControlPoints = state == Qt::Checked;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -320,13 +246,6 @@ void MainWindow::setupBezierSurfaceBox(const QWidget *centralWidget, QVBoxLayout
         {
             Settings &settings                          = Settings::getInstance();
             settings.lightSettings.isLightSourceEnabled = state == Qt::Checked;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -353,13 +272,6 @@ void MainWindow::setupLightningBox(const QWidget *centralWidget, QVBoxLayout *le
         {
             Settings &settings            = Settings::getInstance();
             settings.lightSettings.kdCoef = value / 100.0f;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -377,13 +289,6 @@ void MainWindow::setupLightningBox(const QWidget *centralWidget, QVBoxLayout *le
         {
             Settings &settings            = Settings::getInstance();
             settings.lightSettings.ksCoef = value / 100.0f;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
@@ -401,13 +306,6 @@ void MainWindow::setupLightningBox(const QWidget *centralWidget, QVBoxLayout *le
         {
             Settings &settings       = Settings::getInstance();
             settings.lightSettings.m = value;
-
-            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
-            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
-            if (engine)
-            {
-                engine->draw();
-            }
         }
     );
 
