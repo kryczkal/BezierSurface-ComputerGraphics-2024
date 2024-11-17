@@ -4,6 +4,7 @@
 # Ignore all build directories
 build/
 cmake-build*
+compile-commands.json
 
 # Ignore IDE files
 .idea/
