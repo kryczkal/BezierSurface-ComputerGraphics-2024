@@ -477,6 +477,7 @@ void MainWindow::setupEngine(
     bezierSurface = QSharedPointer<BezierSurface>(new BezierSurface("crazy.txt"));
     lightSource   = QSharedPointer<LightSource>(new LightSource());
     auto lightSource2 = QSharedPointer<LightSource>(new LightSource());
+    lightSource->setPosition(QVector3D(-0.5, -0.5, -0.5));
     lightSource2->setPosition(QVector3D(0.5, 0.5, 0.5));
     texture = QSharedPointer<QImage>(new QImage("textures/testTexture1.jpg"));
     scene->addItem(engine);
