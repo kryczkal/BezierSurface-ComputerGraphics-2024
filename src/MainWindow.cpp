@@ -353,6 +353,37 @@ void MainWindow::setupLightningBox(const QWidget *centralWidget, QVBoxLayout *le
         }
     );
 
+    QLabel *lightSourceLabel2       = new QLabel("Enable Directional Light Source");
+    QCheckBox *lightSourceCheckbox2 = new QCheckBox();
+    lightSourceCheckbox2->setChecked(Settings::getInstance().lightSettings.isReflectorEnabled);
+    lightSettingsLayout->addWidget(lightSourceLabel2);
+    lightSettingsLayout->addWidget(lightSourceCheckbox2);
+    connect(
+        lightSourceCheckbox2, &QCheckBox::stateChanged,
+        [centralWidget](int state)
+        {
+            Settings &settings                        = Settings::getInstance();
+            settings.lightSettings.isReflectorEnabled = state == Qt::Checked;
+        }
+    );
+
+    QLabel *lightSourceLabel3   = new QLabel("M Coeff Reflector");
+    QSlider *lightSourceSlider3 = new QSlider(Qt::Horizontal);
+    lightSourceSlider3->setRange(0, 30);
+    lightSourceSlider3->setValue(Settings::getInstance().lightSettings.mCoeffReflector);
+    lightSourceSlider3->setTickInterval(1);
+    lightSourceSlider3->setTickPosition(QSlider::TicksBelow);
+    lightSettingsLayout->addWidget(lightSourceLabel3);
+    lightSettingsLayout->addWidget(lightSourceSlider3);
+    connect(
+        lightSourceSlider3, &QSlider::valueChanged,
+        [centralWidget](int value)
+        {
+            Settings &settings                     = Settings::getInstance();
+            settings.lightSettings.mCoeffReflector = value;
+        }
+    );
+
     leftToolbarLayout->addWidget(lightSettingsBox);
 }
 
@@ -445,11 +476,14 @@ void MainWindow::setupEngine(
     engine        = new QGraphicsEngine(settings.graphicsEngineSettings.sizeX, settings.graphicsEngineSettings.sizeY);
     bezierSurface = QSharedPointer<BezierSurface>(new BezierSurface("crazy.txt"));
     lightSource   = QSharedPointer<LightSource>(new LightSource());
-    texture       = QSharedPointer<QImage>(new QImage("textures/testTexture1.jpg"));
+    auto lightSource2 = QSharedPointer<LightSource>(new LightSource());
+    lightSource2->setPosition(QVector3D(0.5, 0.5, 0.5));
+    texture = QSharedPointer<QImage>(new QImage("textures/testTexture1.jpg"));
     scene->addItem(engine);
     QSharedPointer<QGraphicsEngineDrawable> drawable = QSharedPointer<QGraphicsEngineDrawable>(bezierSurface);
     engine->addDrawable(drawable);
     engine->addLightSource(lightSource);
+    engine->addLightSource(lightSource2);
     engine->draw();
     QSharedPointer<QImage> normalMap = nullptr;
 

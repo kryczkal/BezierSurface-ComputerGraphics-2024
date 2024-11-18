@@ -18,6 +18,8 @@ class LightSource : public QGraphicsEngineDrawable
     // Getters and setters
     QVector3D &getPosition() { return position; }
     void setPosition(QVector3D position) { this->position = position; }
+    QVector3D &getDirection() { return direction; }
+    void setDirection(QVector3D direction) { this->direction = direction; }
 
     QColor getColor() const { return color; }
     void setColor(QColor color) { this->color = color; }
@@ -31,6 +33,7 @@ class LightSource : public QGraphicsEngineDrawable
 
     private:
     QVector3D position;
+    QVector3D direction;
     QColor color;
 };
 

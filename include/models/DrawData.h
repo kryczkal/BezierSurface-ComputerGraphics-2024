@@ -26,7 +26,7 @@ class DrawData
 
     QMutex zBufferMutex;
     QScopedPointer<float, QScopedPointerArrayDeleter<float>> zBuffer;
-    LightSource *lightSource = nullptr;
+    QVector<QSharedPointer<LightSource>> lightSources;
 
     void initZBuffer();
     void clearZBuffer() const;
@@ -35,7 +35,11 @@ class DrawData
 
     void setBrushColor(const QColor &color);
 
-    void setLightSource(LightSource *lightSource) { this->lightSource = lightSource; }
+    void appendLightSource(const LightSource &lightSource)
+    {
+        lightSources.append(QSharedPointer<LightSource>::create(lightSource));
+    }
+    void clearLightSources() { lightSources.clear(); }
 
     private:
     int X, Y;

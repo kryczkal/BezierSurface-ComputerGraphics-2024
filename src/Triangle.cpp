@@ -265,8 +265,8 @@ void Triangle::drawPixelDebug(
     const QVector3D &normal
 )
 {
-    drawData.lightSource = nullptr;
-    const float coeff    = settings.triangleSettings.triangleEdgeDrawProximityCoef;
+    drawData.lightSources.clear();
+    const float coeff = settings.triangleSettings.triangleEdgeDrawProximityCoef;
     if (barycentric.x() < coeff || barycentric.y() < coeff || barycentric.z() < coeff)
     {
         DrawUtils::drawPixel(drawData, pos, normal, settings.triangleSettings.triangleEdgeColor, x, y);

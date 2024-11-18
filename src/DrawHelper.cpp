@@ -99,37 +99,50 @@ DrawUtils::drawPixel(DrawData &drawData, const QVector3D &position3d, const QVec
 {
     Settings &settings = Settings::getInstance();
 
-    if (settings.lightSettings.isLightSourceEnabled && drawData.lightSource)
+    if (settings.lightSettings.isLightSourceEnabled && !drawData.lightSources.empty())
     {
-        QColor lightColor = drawData.lightSource->getColor();
-        QVector3D L       = drawData.lightSource->calcVersorTo(position3d).normalized();
-        QVector3D N       = normal;
-        QVector3D V(0.0f, 0.0f, -1.0f);
+        float r = 0.0f;
+        float g = 0.0f;
+        float b = 0.0f;
+        for (QSharedPointer<LightSource> lightSource : drawData.lightSources)
+        {
+            QColor lightColor = lightSource->getColor();
+            QVector3D L       = lightSource->calcVersorTo(position3d).normalized();
+            QVector3D N       = normal;
+            QVector3D V(0.0f, 0.0f, -1.0f);
 
-        float cosNL = std::max(0.0f, QVector3D::dotProduct(N, L));
-        QVector3D R = (2.0f * QVector3D::dotProduct(N, L) * N - L).normalized();
-        float cosVR = std::max(0.0f, QVector3D::dotProduct(V, R));
+            float cosNL = std::max(0.0f, QVector3D::dotProduct(N, L));
+            QVector3D R = (2.0f * QVector3D::dotProduct(N, L) * N - L).normalized();
+            float cosVR = std::max(0.0f, QVector3D::dotProduct(V, R));
 
-        float kd = settings.lightSettings.kdCoef;
-        float ks = settings.lightSettings.ksCoef;
-        float m  = settings.lightSettings.m;
+            const float kd = settings.lightSettings.kdCoef;
+            const float ks = settings.lightSettings.ksCoef;
+            const float m  = settings.lightSettings.m;
 
-        float IL_r = lightColor.redF();
-        float IL_g = lightColor.greenF();
-        float IL_b = lightColor.blueF();
+            float lightPower = 1.0f;
+            if (settings.lightSettings.isReflectorEnabled)
+            {
+                const int mCoeffReflector = settings.lightSettings.mCoeffReflector;
+                lightPower =
+                    std::pow(std::max(0.0f, QVector3D::dotProduct(L, lightSource->getDirection())), mCoeffReflector);
+            }
 
-        float IO_r = color.redF();
-        float IO_g = color.greenF();
-        float IO_b = color.blueF();
+            float IL_r = lightColor.redF() * lightPower;
+            float IL_g = lightColor.greenF() * lightPower;
+            float IL_b = lightColor.blueF() * lightPower;
 
-        float r = kd * IL_r * IO_r * cosNL + ks * IL_r * IO_r * std::pow(cosVR, m);
-        float g = kd * IL_g * IO_g * cosNL + ks * IL_g * IO_g * std::pow(cosVR, m);
-        float b = kd * IL_b * IO_b * cosNL + ks * IL_b * IO_b * std::pow(cosVR, m);
+            float IO_r = color.redF();
+            float IO_g = color.greenF();
+            float IO_b = color.blueF();
 
-        r = std::min(1.0f, r);
-        g = std::min(1.0f, g);
-        b = std::min(1.0f, b);
+            r += kd * IL_r * IO_r * cosNL + ks * IL_r * IO_r * std::pow(cosVR, m);
+            g += kd * IL_g * IO_g * cosNL + ks * IL_g * IO_g * std::pow(cosVR, m);
+            b += kd * IL_b * IO_b * cosNL + ks * IL_b * IO_b * std::pow(cosVR, m);
 
+            r = std::min(1.0f, r);
+            g = std::min(1.0f, g);
+            b = std::min(1.0f, b);
+        }
         color = QColor::fromRgbF(r, g, b);
     }
 

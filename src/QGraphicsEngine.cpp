@@ -76,8 +76,11 @@ void QGraphicsEngine::draw()
     Settings &settings = Settings::getInstance();
     _qImage.fill(settings.graphicsEngineSettings.backgroundColor);
     DrawData drawData(_qImage);
-    drawData.brushColor  = settings.bezierSurfaceSettings.defaultColor;
-    drawData.lightSource = _lightSources.size() > 0 ? _lightSources[0].data() : nullptr;
+    drawData.brushColor = settings.bezierSurfaceSettings.defaultColor;
+    for (QSharedPointer<LightSource> lightSource : _lightSources)
+    {
+        drawData.appendLightSource(*lightSource);
+    }
 
     //    QMutexLocker locker(&_drawMutex);
     for (auto &drawable : _drawables)
@@ -146,7 +149,8 @@ void QGraphicsEngine::autoMoveLightSources()
 
     QDateTime currentDateTime          = QDateTime::currentDateTime();
     qint64 currentMSecsSinceEpoch      = currentDateTime.toMSecsSinceEpoch();
-    settings.lightSettings.orbitRadius = 0.15f + 0.10f * sin(currentMSecsSinceEpoch / 1000.0f);
+    settings.lightSettings.orbitRadius = settings.lightSettings.sineCoeff * sin(currentMSecsSinceEpoch / 1000.0f) +
+                                         settings.lightSettings.baseOrbitRadius;
 
     for (auto &lightSource : _lightSources)
     {
@@ -155,6 +159,8 @@ void QGraphicsEngine::autoMoveLightSources()
             position, settings.lightSettings.orbitCenter, settings.lightSettings.orbitRadius,
             settings.lightSettings.orbitSpeed
         );
+        // Set direction as normalized vector from light source to orbit center
+        lightSource->setDirection((settings.lightSettings.centerToPointAt - position).normalized());
     }
 }
 
