@@ -9,6 +9,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QRandomGenerator>
 #include <QSlider>
 #include <QSpacerItem>
 #include <QSplitter>
@@ -114,9 +115,20 @@ void MainWindow::setupMiscBox(
             QString path = QFileDialog::getOpenFileName(
                 centralWidget, "Open Normal Map", dir.absolutePath(), "Images (*.png *.jpg)"
             );
-            if (!path.isEmpty())
+
+            // find engine
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (engine && !path.isEmpty())
             {
-                bezierSurface->setNormalMap(QSharedPointer<QImage>(new QImage(path)));
+                for (auto drawable : engine->getDrawables())
+                {
+                    auto mesh = qSharedPointerCast<Mesh>(drawable);
+                    if (mesh)
+                    {
+                        mesh->setNormalMap(QSharedPointer<QImage>(new QImage(path)));
+                    }
+                }
             }
         }
     );
@@ -130,9 +142,20 @@ void MainWindow::setupMiscBox(
             QDir dir("textures");
             QString path =
                 QFileDialog::getOpenFileName(centralWidget, "Open Texture", dir.absolutePath(), "Images (*.png *.jpg)");
-            if (!path.isEmpty())
+
+            // find engine
+            QGraphicsView *mainView = centralWidget->findChild<QGraphicsView *>();
+            QGraphicsEngine *engine = dynamic_cast<QGraphicsEngine *>(mainView->scene()->items().first());
+            if (!path.isEmpty() && engine)
             {
-                bezierSurface->setTexture(QSharedPointer<QImage>(new QImage(path)));
+                for (auto drawable : engine->getDrawables())
+                {
+                    auto mesh = qSharedPointerCast<Mesh>(drawable);
+                    if (mesh)
+                    {
+                        mesh->setTexture(QSharedPointer<QImage>(new QImage(path)));
+                    }
+                }
             }
         }
     );
@@ -482,7 +505,26 @@ void MainWindow::setupEngine(
     texture = QSharedPointer<QImage>(new QImage("textures/testTexture1.jpg"));
     scene->addItem(engine);
     QSharedPointer<QGraphicsEngineDrawable> drawable = QSharedPointer<QGraphicsEngineDrawable>(bezierSurface);
-    engine->addDrawable(drawable);
+    //    engine->addDrawable(drawable);
+    QVector<QString> files = {"meshes/IronMan.obj"};
+    for (int i = 0; i < files.size(); ++i)
+    {
+        auto dinosaur = QSharedPointer<Mesh>(new Mesh());
+        dinosaur->readFromFile(files[i]);
+        auto drawableDinosaur = QSharedPointer<QGraphicsEngineDrawable>(dinosaur);
+        // Random
+        double randomX = QRandomGenerator::global()->generateDouble();
+        double randomZ = QRandomGenerator::global()->generateDouble();
+
+        //        QVector3D translationVector(0.4, 0.4, 0);
+        //        dinosaur->setPosition(translationVector);
+        //        QMatrix4x4 translationMatrix;
+        //        translationMatrix.translate(translationVector);
+        //        dinosaur->transform(translationMatrix);
+        engine->addDrawable(drawableDinosaur);
+    }
+
+    engine->addLightSource(lightSource);
     engine->addLightSource(lightSource);
     engine->addLightSource(lightSource2);
     engine->draw();

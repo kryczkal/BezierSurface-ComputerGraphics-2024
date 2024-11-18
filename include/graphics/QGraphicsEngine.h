@@ -26,6 +26,7 @@ class QGraphicsEngine : public QGraphicsItem
     void setRotationY(float rotationY);
     void setRotationZ(float rotationZ);
     void setRotation(float x, float y, float z);
+    QVector<QSharedPointer<QGraphicsEngineDrawable>> getDrawables() { return _drawables; }
 
     QSharedPointer<QTimer> getAnimationTimer() const { return _animationTimer; }
     void setAnimationTimer(QSharedPointer<QTimer> animationTimer) { _animationTimer = animationTimer; }

@@ -21,6 +21,8 @@ class Mesh : public QGraphicsEngineDrawable
 
     // Getters
     [[maybe_unused]] [[nodiscard]] QVector<Triangle> getTriangles() const;
+    [[maybe_unused]] [[nodiscard]] QVector3D getPosition() const { return _position; }
+    [[maybe_unused]] [[nodiscard]] QMatrix4x4 getModelMatrix() const { return _modelMatrix; }
 
     [[nodiscard]] QSharedPointer<QImage> getTexture() const { return _texture; }
     void setTexture(QSharedPointer<QImage> texture)
@@ -35,6 +37,8 @@ class Mesh : public QGraphicsEngineDrawable
         QMutexLocker locker(&_mutex);
         _normalMap = normalMap;
     }
+
+    void setPosition(const QVector3D &position) { _position = position; }
 
     // Tessellation
     [[maybe_unused]] static Mesh create2dTessellation(int tessellationLevel);
@@ -54,6 +58,8 @@ class Mesh : public QGraphicsEngineDrawable
         QMutexLocker locker(&_mutex);
         setNormalMap(QSharedPointer<QImage>::create(QImage(path)));
     }
+    void readFromFile(const QString &path);
+    void normalize();
 
     protected:
     QVector3D _position;
@@ -64,6 +70,8 @@ class Mesh : public QGraphicsEngineDrawable
     QMutex _mutex;
 
     void sortTrianglesByDepth();
+
+    void calculateTangents();
 };
 
 #endif // BEZIERSURFACE_COMPUTERGRAPHICS_2024_MESH_H

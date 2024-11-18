@@ -10,8 +10,8 @@
 class GraphicsEngineSettings
 {
     public:
-    int sizeX              = 900;
-    int sizeY              = 900;
+    int sizeX              = 700;
+    int sizeY              = 700;
     QColor backgroundColor = Qt::white;
 };
 

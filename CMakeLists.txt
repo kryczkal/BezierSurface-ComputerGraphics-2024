@@ -22,6 +22,12 @@ foreach(TXT_FILE ${TXT_FILES})
     configure_file(${TXT_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${TXT_FILE_NAME} COPYONLY)
 endforeach()
 
+file(GLOB MESHES "${CMAKE_CURRENT_SOURCE_DIR}/assets/meshes/*")
+foreach(MESH ${MESHES})
+    get_filename_component(MESH_NAME ${MESH} NAME)
+    configure_file(${MESH} ${CMAKE_CURRENT_BINARY_DIR}/meshes/${MESH_NAME} COPYONLY)
+endforeach()
+
 file(GLOB TEXTURES "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/*.png" "${CMAKE_CURRENT_SOURCE_DIR}/assets/textures/*.jpg")
 foreach(TEXTURE ${TEXTURES})
     get_filename_component(TEXTURE_NAME ${TEXTURE} NAME)
