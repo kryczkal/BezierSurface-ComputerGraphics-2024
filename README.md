@@ -1,31 +1,30 @@
 # Parallel CPU Rendering Engine in C++ with Qt
 
 ## Table of Contents
+1. [Project Overview](#project-overview)  
+2. [GIFs](#gifs)  
+3. [Features](#features)  
+   - [Parallelized Rendering Pipeline](#parallelized-rendering-pipeline)  
+   - [Obj Files](#obj-files)  
+   - [Bezier Surface Input](#bezier-surface-input)  
+   - [Flexible 3D Transformations](#flexible-3d-transformations)  
+   - [Rendering Modes](#rendering-modes)  
+   - [Advanced Lighting Model](#advanced-lighting-model)  
+   - [Texture and Normal Mapping](#texture-and-normal-mapping)  
+   - [Animation Features](#animation-features)  
+   - [Multi-Resolution Canvas](#multi-resolution-canvas)  
+   - [ZBuffering](#zbuffering)  
+4. [File Input Format](#file-input-format)  
+   - [Obj Files Input](#obj-files-input)  
+   - [Bezier Surface Files](#bezier-surface-files)  
+5. [Requirements](#requirements)  
+   - [Software](#software)  
+   - [Libraries and Tools](#libraries-and-tools)  
+6. [Running the Application](#running-the-application)  
+   - [Steps to Build and Run](#steps-to-build-and-run)  
+   - [Additional Notes](#additional-notes)  
 
-- [Parallel CPU Rendering Engine in C++ with Qt](#parallel-cpu-rendering-engine-in-c-with-qt)
-  - [Table of Contents](#table-of-contents)
-  - [Project Overview](#project-overview)
-  - [Gifs](#gifs)
-  - [Features](#features)
-    - [Parallelized Rendering Pipeline](#parallelized-rendering-pipeline)
-    - [.obj Files](#obj-files)
-    - [Bezier Surface Input](#bezier-surface-input)
-    - [Flexible 3D Transformations](#flexible-3d-transformations)
-    - [Rendering Modes](#rendering-modes)
-    - [Advanced Lighting Model](#advanced-lighting-model)
-    - [Texture and Normal Mapping](#texture-and-normal-mapping)
-    - [Animation Features](#animation-features)
-    - [Multi-Resolution Canvas](#multi-resolution-canvas)
-    - [ZBuffering](#zbuffering)
-  - [File Input Format](#file-input-format)
-    - [Obj Files](#obj-files-1)
-    - [Bezier Surface Files](#bezier-surface-files)
-  - [Requirements](#requirements)
-    - [Software](#software)
-    - [Libraries and Tools](#libraries-and-tools)
-  - [Running the Application](#running-the-application)
-    - [Steps to Build and Run](#steps-to-build-and-run)
-    - [Additional Notes](#additonal-notes)
+
 
 ## Project Overview
 
@@ -53,8 +52,8 @@ While the project started with a 3rd-degree Bezier surface converted into a mesh
    - The rasterization and lighting computation for individual triangles are executed concurrently using CPU threads.
    - The engine efficiently distributes rendering tasks across available CPU cores.
 
-2. **.obj files **
-   - .obj files are currently partialy loadable (with loss of information), but capable to be displayed.
+2. **Obj files**
+   - `.obj` files are currently partialy loadable (with loss of information), but capable to be displayed.
    - Stronger support is under progress
 
 4. **Bezier Surface Input**
@@ -103,7 +102,7 @@ While the project started with a 3rd-degree Bezier surface converted into a mesh
 ---
 
 ## File Input Format
-### Obj Files
+### Obj Files Input
 .obj files in folder [meshes](assets/meshes) can be loaded
 
 ### Bezier Surface Files
@@ -162,6 +161,6 @@ Examples of input files are in [assets/bezierSurfaces](assets/bezierSurfaces)
   ./BezierSurface-ComputerGraphics-2024
 ```
 
-### Additonal notes
+### Additional notes
 - **Assets**: All Bezier surface files, textures, and normal maps are automatically copied to the build directory during the configuration step.
 - **Settings**: Large amount of settings is configurable via [settings folder](include/settings)
