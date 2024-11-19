@@ -2,11 +2,13 @@
 
 ## Table of Contents
 
-- [Parallel Rendering Engine in C++ with Qt](#parallel-rendering-engine-in-c-with-qt)
+- [Parallel CPU Rendering Engine in C++ with Qt](#parallel-cpu-rendering-engine-in-c-with-qt)
+  - [Table of Contents](#table-of-contents)
   - [Project Overview](#project-overview)
   - [Gifs](#gifs)
   - [Features](#features)
     - [Parallelized Rendering Pipeline](#parallelized-rendering-pipeline)
+    - [.obj Files](#obj-files)
     - [Bezier Surface Input](#bezier-surface-input)
     - [Flexible 3D Transformations](#flexible-3d-transformations)
     - [Rendering Modes](#rendering-modes)
@@ -16,6 +18,8 @@
     - [Multi-Resolution Canvas](#multi-resolution-canvas)
     - [ZBuffering](#zbuffering)
   - [File Input Format](#file-input-format)
+    - [Obj Files](#obj-files-1)
+    - [Bezier Surface Files](#bezier-surface-files)
   - [Requirements](#requirements)
     - [Software](#software)
     - [Libraries and Tools](#libraries-and-tools)
@@ -31,13 +35,15 @@ This project is a simplified **rendering engine**, built in C++ and Qt, running 
 - ZBuffering.
 - Texture and normal mapping.
 - Concurrent rendering of scenes with a customizable canvas resolution.
+- Loading of meshes in .obj files
 
-The core feature of this engine is its ability to process 3D objects, represented as meshes of triangles, and render them efficiently using triangle rasterization techniques performed in parralell. While the primary object of interest is a 3rd-degree Bezier surface converted into a mesh via triangulation, the system is designed to handle any triangle-based mesh.
+The core feature of this engine is its ability to process 3D objects, represented as meshes of triangles, and render them efficiently using triangle rasterization techniques performed in parralell. 
+While the project started with a 3rd-degree Bezier surface converted into a mesh via triangulation as a primary object of interest, the system is designed to handle any triangle-based mesh and .obj files are loadable.
 
 ## Gifs
+![](gifs/6.gif)
+![](gifs/7.gif)
 ![](gifs/1.gif)
-![](gifs/2.gif)
-![](gifs/3.gif)
 ![](gifs/4.gif)
 ![](gifs/5.gif)
 
@@ -47,23 +53,27 @@ The core feature of this engine is its ability to process 3D objects, represente
    - The rasterization and lighting computation for individual triangles are executed concurrently using CPU threads.
    - The engine efficiently distributes rendering tasks across available CPU cores.
 
-2. **Bezier Surface Input**
-   - Reads 16 control points (x, y, z) from a text file to define a 3rd-degree Bezier surface.
+2. **.obj files **
+   - .obj files are currently partialy loadable (with loss of information), but capable to be displayed.
+   - Stronger support is under progress
+
+4. **Bezier Surface Input**
+   - The project started as BezierSurface visualization and as such a bezier surface can be loaded from a text file with 16 control points (x, y, z) defining a 3rd-degree Bezier surface.
    - The Bezier surface is:
      - Interpolated and triangulated into a mesh.
      - Designed to fit within a bounding box resembling a cube.
      - Easily drawable on a canvas centered at the origin.
 
-3. **Flexible 3D Transformations**
+5. **Flexible 3D Transformations**
    - Supports most 3d transformations such as 3D rotations
    - Triangles and their properties (vertices, tangents, normals) are transformed in 3D before rendering.
    - Orthographic projection is applied for 2D visualization.
 
-4. **Rendering Modes**
+6. **Rendering Modes**
    - **Wireframe Mode**: Displays only the triangulated mesh structure.
    - **Shaded Mode**: Renders filled triangles with applied textures and lighting.
 
-5. **Advanced Lighting Model**
+7. **Advanced Lighting Model**
    - Integrates Lambertian and specular reflection for realistic shading:
      ```
      I = kd * IL_0 * IO_0 * cos(θ(N, L)) + ks * IL_0 * IO_0 * cos^m(θ(V, R)) +
@@ -74,26 +84,29 @@ The core feature of this engine is its ability to process 3D objects, represente
      - Fully supports multiple light sources with user-configured positions and colors.
      - Performs per-pixel shading based on interpolated normals and barycentric coordinates.
 
-6. **Texture and Normal Mapping**
+8. **Texture and Normal Mapping**
    - Adds realism through texture mapping (UV-based) and normal maps.
    - Normal mapping:
      - Adjusts per-pixel normals based on a transformation matrix and texture-derived vectors.
      - Supports user-specified normal maps in the RGB format.
 
-7. **Animation Features**
+9. **Animation Features**
    - Includes a moving light source that spirals in 3D space (constant Z-plane, adjustable via slider).
    - Users can pause and resume light source animations for static or dynamic scenes.
 
-8. **Multi-Resolution Canvas**
+10. **Multi-Resolution Canvas**
    - The rendering canvas resolution can be customized in the application settings, enabling support for high-resolution outputs.
   
-9. **ZBuffering**
+11. **ZBuffering**
    - ZBuffering is implemented to properly render overlapping objects
 
 ---
 
 ## File Input Format
+### Obj Files
+.obj files in folder [meshes](assets/meshes) can be loaded
 
+### Bezier Surface Files
 The engine reads Bezier surface control points from a text file with the following format:
 ```
 X00 Y00 Z00
