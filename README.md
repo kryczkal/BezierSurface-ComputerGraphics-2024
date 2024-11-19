@@ -103,7 +103,7 @@ While the project started with a 3rd-degree Bezier surface converted into a mesh
 
 ## File Input Format
 ### Obj Files Input
-.obj files in folder [meshes](assets/meshes) can be loaded
+.obj files will be copied from `assets/meshes` into the path of the executable via cmake and can be referenced by `assets/meshes/{myMesh}.obj` 
 
 ### Bezier Surface Files
 The engine reads Bezier surface control points from a text file with the following format:
