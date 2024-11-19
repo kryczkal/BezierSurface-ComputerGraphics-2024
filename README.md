@@ -145,7 +145,7 @@ Examples of input files are in [assets/bezierSurfaces](assets/bezierSurfaces)
 1. **Clone the Repository**:
 ```bash
    git clone <repository-url>
-   cd BezierSurface-ComputerGraphics-2024
+   cd CpuRenderEngine
 ```
 2. **Prepare build directory**:
 ```bash
@@ -158,7 +158,7 @@ Examples of input files are in [assets/bezierSurfaces](assets/bezierSurfaces)
 ```
 4. **Run the application**
 ```
-  ./BezierSurface-ComputerGraphics-2024
+  ./CpuRenderEngine
 ```
 
 ### Additional notes
