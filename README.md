@@ -131,7 +131,6 @@ Examples of input files are in [assets/bezierSurfaces](assets/bezierSurfaces)
 
 ### Libraries and Tools
 - **GNU Make** or other build tools supported by your environment.
-- **Qt Creator** (optional): For easier Qt application development.
 - **Assets**:
   - Bezier surface definitions (`.txt` files) in `assets/bezierSurfaces/`.
   - Texture files (`.png`, `.jpg`) in `assets/textures/`.
