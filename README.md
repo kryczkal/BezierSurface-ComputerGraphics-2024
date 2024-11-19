@@ -37,7 +37,7 @@ This project is a simplified **rendering engine**, built in C++ and Qt, running 
 - Concurrent rendering of scenes with a customizable canvas resolution.
 - Loading of meshes in .obj files
 
-The core feature of this engine is its ability to process 3D objects, represented as meshes of triangles, and render them efficiently using triangle rasterization techniques performed in parralell. 
+The core feature of this engine is its ability to process 3D objects, represented as meshes of triangles, and render them efficiently using triangle rasterization techniques performed in parallel. 
 While the project started with a 3rd-degree Bezier surface converted into a mesh via triangulation as a primary object of interest, the system is designed to handle any triangle-based mesh and .obj files are loadable.
 
 ## Gifs
